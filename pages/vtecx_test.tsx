@@ -124,6 +124,10 @@ export default function HomePage() {
     doRequest()
     console.log(`[handleClick end]`)
   }
+  
+  const sizeText = 54
+  const rowTextarea = 5
+  const colsTextarea = 50
 
   return (
     <div>
@@ -138,12 +142,12 @@ export default function HomePage() {
         <tbody>
           <tr>
             <td align="right" valign="top"><label>URLパラメータ: </label></td>
-            <td valign="top"><input type="text" size="54" id="urlparam" name="urlparam" value={urlparam} 
+            <td valign="top"><input type="text" size={sizeText} id="urlparam" name="urlparam" value={urlparam} 
                        onChange={(event) => setUrlparam(event.target.value)} /></td>
           </tr>
           <tr>
             <td align="right" valign="top"><label>リクエストデータ: </label></td>
-            <td valign="top"><textarea rows="5" cols="50" id="reqdata" name="reqdata" value={reqdata}
+            <td valign="top"><textarea rows={rowTextarea} cols={colsTextarea} id="reqdata" name="reqdata" value={reqdata}
                        onChange={(event) => setReqdata(event.target.value)} /></td>
           </tr>
         </tbody>
