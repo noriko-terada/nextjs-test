@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { getAuthToken } from 'vtecxauth'
 
-function Header({ title }) {
+function Header({title} : {title:string}) {
   return <h1>{title ? title : 'Default title'}</h1>;
 }
 
