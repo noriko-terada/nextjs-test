@@ -42,20 +42,18 @@ export const requestVtecx = async (method:string, url:string, req:NextApiRequest
  * @param body リクエストデータ
  * @returns promise
  */
-export const fetchVtecx = async (method:string, url:string, headers:[string, string][],
-    body:any) => {
+export const fetchVtecx = async (method:string, url:string, headers:any, body:any) => {
   console.log(`[fetchVtecx] url=${process.env.VTECX_URL}${url}`)
-  const mapHeaders = new Map<string, string>(Object.entries(headers))
-  mapHeaders.set('X-Requested-With', 'XMLHttpRequest')
+  headers['X-Requested-With'] = 'XMLHttpRequest'
   const apiKey = process.env.VTECX_APIKEY
   if (apiKey != null) {
-    mapHeaders.set('Authorization', `APIKey ${apiKey}`)
+    headers['Authorization'] = `APIKey ${apiKey}`
   }
-  console.log(`[fetchVtecx] headers = ${mapHeaders}`)
+  console.log(`[fetchVtecx] headers = ${headers}`)
   const requestInit:RequestInit = {
     body: body,
     method: method,
-    headers: mapHeaders
+    headers: headers
   }
 
   return fetch(`${process.env.VTECX_URL}${url}`, requestInit)
