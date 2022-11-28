@@ -25,7 +25,7 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse) {
   const method = 'GET'
   const url = '/d/?_login'
   const headers = {'X-WSSE' : `${wsse}`}
-  const response = await fetchVtecx(method, url, headers)
+  const response = await fetchVtecx(method, url, headers, null)
   const feed = await response.json()
   // レスポンスヘッダの値のうち、"content-type"、"set-cookie"、"x-"で始まるものをセット
   const it = response.headers.entries()

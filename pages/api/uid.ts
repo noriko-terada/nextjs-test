@@ -10,7 +10,7 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse) {
   // vte.cxへリクエスト
   const method = 'GET'
   const url = '/d/?_uid'
-  const response = await requestVtecx(method, url, req)
+  const response = await requestVtecx(method, url, req, null)
   const feed = await response.json()
 
   console.log("[uid] end.")

@@ -22,7 +22,7 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse) {
   // vte.cxへリクエスト
   const method = 'GET'
   const url = `/p${uri}?f${param}`
-  const response = await requestVtecx(method, url, req)
+  const response = await requestVtecx(method, url, req, null)
   const feed = await response.json()
     console.log("[getfeed] end.")
     res.status(response.status).json(feed)

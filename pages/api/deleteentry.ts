@@ -17,7 +17,7 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse) {
   // vte.cxへリクエスト
   const method = 'DELETE'
   const url = `/p${uri}?e`
-  const response = await requestVtecx(method, url, req)
+  const response = await requestVtecx(method, url, req, null)
   const feed = await response.json()
   console.log("[deleteentry] end.")
   res.status(response.status).json(feed)
