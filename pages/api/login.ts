@@ -15,6 +15,8 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse) {
 
   // リクエストヘッダからWSSEを取得
   const wsse = req.headers['x-wsse']
+  const reCaptchaToken = req.query['g-recaptcha-token']
+  const param = reCaptchaToken ? `&g-recaptcha-token=${reCaptchaToken}` : ''
   console.log(`[login] x-wsse=${wsse}`)
   if (wsse == null) {
     console.log(`[login] x-wsse header is required.`)
@@ -23,7 +25,7 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse) {
   }
   
   const method = 'GET'
-  const url = '/d/?_login'
+  const url = `/d/?_login${param}`
   const headers = {'X-WSSE' : `${wsse}`}
   const response = await fetchVtecx(method, url, headers, null)
   const feed = await response.json()

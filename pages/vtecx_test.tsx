@@ -84,7 +84,7 @@ export default function HomePage() {
     return data
   }
    
-  const doRequest = () => {
+  const doRequest = async () => {
     setResult("")
     console.log(`[doRequest] start. action=${action}`)
     // selectの値を取得
@@ -105,6 +105,7 @@ export default function HomePage() {
     }
 
     if (method != null) {
+      /*
       const promise = request(method, action, body)
       promise.then((data) => {
         const feedStr = JSON.stringify(data)
@@ -114,12 +115,18 @@ export default function HomePage() {
         console.log(`[doRequest] err=${err}`)
         setResult("Error occured.")
       })
+      */
+      const data = await request(method, action, body)
+      const feedStr = JSON.stringify(data)
+      console.log(`[doRequest] data=${feedStr}`)
+      setResult(feedStr)
+
     } else {
       setResult(`no action: ${action}`)
     }
   }
   
-  const handleClick = () => {
+  const handleClick = async () => {
     console.log(`[handleClick start]`)
     doRequest()
     console.log(`[handleClick end]`)

@@ -1,19 +1,34 @@
-import { useState } from 'react';
+import { useState } from 'react'
 import { getAuthToken } from 'vtecxauth'
 import Link from 'next/link'
+import { useGoogleReCaptcha } from "react-google-recaptcha-v3"
 
 function Header({title} : {title:string}) {
-  return <h1>{title ? title : 'Default title'}</h1>;
+  return <h1>{title ? title : 'Default title'}</h1>
 }
 
+/**
+ * ページ関数
+ * @returns HTML
+ */
 export default function HomePage() {
-  const [username, setUsername] = useState("");
-  const [pswrd, setPswrd] = useState("");
-  const [result, setResult] = useState("");
+  const [username, setUsername] = useState("")
+  const [pswrd, setPswrd] = useState("")
+  const [result, setResult] = useState("")
+  // ホームページ関数内で定義
+  const { executeRecaptcha } = useGoogleReCaptcha()
 
-  const login = async (wsse:string) => {
+  /**
+   * ログインリクエスト
+   * API Routeにリクエストする
+   * @param wsse WSSE
+   * @param reCaptchaToken reCAPTCHAトークン
+   * @returns API Routeからの戻り値
+   */
+  const login = async (wsse:string, reCaptchaToken:string) => {
     console.log('[login] start.')
-    const response = await fetch('api/login',
+    const param = reCaptchaToken ? `?g-recaptcha-token=${reCaptchaToken}` : ''
+    const response = await fetch(`api/login${param}`,
     {
       method: 'GET',
       headers: {
@@ -44,24 +59,18 @@ export default function HomePage() {
     }
   }
   
-  const requestLogin = () => {
-    console.log(`[requestLogin] start.`)
+  const handleClick = async () => {
+    console.log(`[handleClick start] username=${username}, pass=${pswrd}`)
+    // 結果表示欄をクリア
     setResult("")
+    // reCAPTCHAトークンを取得
+    const reCaptchaToken = await executeRecaptcha('contactPage')
     // WSSEを生成
     const wsse = getAuthToken(username, pswrd)
-    const promise = login(wsse)
-    promise.then((retStr) => {
-      console.log(`[requestLogin] data=${retStr}`) // `data.json()` の呼び出しで解釈された JSON データ
-      setResult(retStr)
-    }).catch((err) => {
-      console.log(`[requestLogin] err=${err}`)
-      setResult("login failed.")
-    })
-  }
-  
-  const handleClick = () => {
-    console.log(`[handleClick start] username=${username}, pass=${pswrd}`)
-    requestLogin()
+    // ログイン
+    const retStr = await login(wsse, reCaptchaToken)
+    // 結果表示
+    setResult(retStr)
     console.log(`[handleClick end]`)
   }
 
