@@ -64,7 +64,7 @@ export default function HomePage() {
     // 結果表示欄をクリア
     setResult("")
     // reCAPTCHAトークンを取得
-    const reCaptchaToken = executeRecaptcha? await executeRecaptcha('contactPage') : null
+    const reCaptchaToken = executeRecaptcha? await executeRecaptcha('contactPage') : undefined
     // WSSEを生成
     const wsse = getAuthToken(username, pswrd)
     // ログイン
