@@ -17,7 +17,7 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse) {
         }
       )
       const feed = await response.json()
-      console.log("[get_now] end.")
+      console.log('[get_now] end.')
       res.status(200).json(feed)
     }
 }

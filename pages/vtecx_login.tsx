@@ -12,9 +12,9 @@ function Header({title} : {title:string}) {
  * @returns HTML
  */
 export default function HomePage() {
-  const [username, setUsername] = useState("")
-  const [pswrd, setPswrd] = useState("")
-  const [result, setResult] = useState("")
+  const [username, setUsername] = useState('')
+  const [pswrd, setPswrd] = useState('')
+  const [result, setResult] = useState('')
   // ホームページ関数内で定義
   const { executeRecaptcha } = useGoogleReCaptcha()
 
@@ -62,9 +62,9 @@ export default function HomePage() {
   const handleClick = async () => {
     console.log(`[handleClick start] username=${username}, pass=${pswrd}`)
     // 結果表示欄をクリア
-    setResult("")
+    setResult('')
     // reCAPTCHAトークンを取得
-    const reCaptchaToken = executeRecaptcha? await executeRecaptcha('contactPage') : undefined
+    const reCaptchaToken = executeRecaptcha? await executeRecaptcha('contactPage') : ''
     // WSSEを生成
     const wsse = getAuthToken(username, pswrd)
     // ログイン

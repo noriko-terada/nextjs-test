@@ -6,11 +6,10 @@ function Header({title} : {title:string}) {
 }
 
 export default function HomePage() {
-  const [action, setAction] = useState("");
-
-  const [urlparam, setUrlparam] = useState("");
-  const [reqdata, setReqdata] = useState("");
-  const [result, setResult] = useState("");
+  const [action, setAction] = useState('');
+  const [urlparam, setUrlparam] = useState('');
+  const [reqdata, setReqdata] = useState('');
+  const [result, setResult] = useState('');
 
   const options = [
     {
@@ -85,23 +84,23 @@ export default function HomePage() {
   }
    
   const doRequest = async () => {
-    setResult("")
+    setResult('')
     console.log(`[doRequest] start. action=${action}`)
     // selectの値を取得
     let method
     let apiAction
     let body
-    if (action === "uid" || action === "whoami" || action === "getentry" || action === "getfeed" ||
-        action === "getcount" || action === "logout") {
-      method = "GET"
-    } else if (action === "log" || action === "postentry") {
-      method = "POST"
+    if (action === 'uid' || action === 'whoami' || action === 'getentry' || action === 'getfeed' ||
+        action === 'getcount' || action === 'logout') {
+      method = 'GET'
+    } else if (action === 'log' || action === 'postentry') {
+      method = 'POST'
       body = reqdata
-    } else if (action === "putentry") {
-      method = "PUT"
+    } else if (action === 'putentry') {
+      method = 'PUT'
       body = reqdata
-    } else if (action === "deleteentry") {
-      method = "DELETE"
+    } else if (action === 'deleteentry') {
+      method = 'DELETE'
     }
 
     if (method != null) {
@@ -113,7 +112,7 @@ export default function HomePage() {
         setResult(feedStr)
       }).catch((err) => {
         console.log(`[doRequest] err=${err}`)
-        setResult("Error occured.")
+        setResult('Error occured.')
       })
       */
       const data = await request(method, action, body)
@@ -126,11 +125,13 @@ export default function HomePage() {
     }
   }
   
+  /*
   const handleClick = async () => {
     console.log(`[handleClick start]`)
     doRequest()
     console.log(`[handleClick end]`)
   }
+  */
   
   const sizeText = 54
   const rowTextarea = 5
@@ -160,7 +161,7 @@ export default function HomePage() {
         </tbody>
       </table>
       <br/>
-      <button onClick={handleClick}>実行</button>
+      <button onClick={doRequest}>実行</button>
       <br/>
       <label>実行結果: </label>
       <br/>

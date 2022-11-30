@@ -12,6 +12,6 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse) {
   const url = '/d/?_whoami'
   const response = await requestVtecx(method, url, req, null)
   const feed = await response.json()
-  console.log("[whoami] end.")
+  console.log('[whoami] end.')
   res.status(response.status).json(feed)
 }

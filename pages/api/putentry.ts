@@ -13,6 +13,6 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse) {
   const url = `/p/?e`
   const response = await requestVtecx(method, url, req, req.body)
   const feed = await response.json()
-  console.log("[putentry] end.")
+  console.log('[putentry] end.')
   res.status(response.status).json(feed)
 }

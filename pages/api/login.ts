@@ -20,7 +20,7 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse) {
   console.log(`[login] x-wsse=${wsse}`)
   if (wsse == null) {
     console.log(`[login] x-wsse header is required.`)
-    res.status(400).json({feed : {title: "Authentication is required."}})
+    res.status(400).json({feed : {title: 'Authentication is required.'}})
     return
   }
   
@@ -29,20 +29,20 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse) {
   const headers = {'X-WSSE' : `${wsse}`}
   const response = await fetchVtecx(method, url, headers, null)
   const feed = await response.json()
-  // レスポンスヘッダの値のうち、"content-type"、"set-cookie"、"x-"で始まるものをセット
+  // レスポンスヘッダの値のうち、'content-type'、'set-cookie'、'x-'で始まるものをセット
   const it = response.headers.entries()
   let tmp = it.next()
   while (!tmp.done) {
     const name = tmp.value[0]
     const val = tmp.value[1]
     console.log(`[login] response.header = ${name} : ${val}`)
-    if (name.startsWith("x-") || name === "set-cookie" || name === "content-type") {
+    if (name.startsWith('x-') || name === 'set-cookie' || name === 'content-type') {
       console.log(`[login] (set) response.header = ${name} : ${val}`)
       res.setHeader(name, val)
     }
     tmp = it.next()
   }
 
-  console.log("[login] end.")
+  console.log('[login] end.')
   res.status(response.status).json(feed)
 }

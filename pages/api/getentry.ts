@@ -8,13 +8,13 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse) {
     return
   }
   // キーを取得
-  const uri = req.query["uri"]
+  const uri = req.query['uri']
   console.log(`[getentry] uri=${uri}`)
   // vte.cxへリクエスト
   const method = 'GET'
   const url = `/p${uri}?e`
   const response = await requestVtecx(method, url, req, null)
   const feed = await response.json()
-  console.log("[getentry] end.")
+  console.log('[getentry] end.')
   res.status(response.status).json(feed)
 }

@@ -10,7 +10,7 @@ import { NextApiRequest, NextApiResponse } from 'next'
 export const checkXRequestedWith = (req:NextApiRequest, res:NextApiResponse) => {
   console.log(`[checkXRequestedWith] start. x-requested-with=${req.headers['x-requested-with']}`)
   // X-Requested-With ヘッダがない場合エラー
-  if (req.headers['x-requested-with'] == null) {
+  if (!req.headers['x-requested-with']) {
     console.log(`[checkXRequestedWith] x-requested-with header is required.`)
     res.status(417).json(undefined)
     return false
@@ -28,7 +28,7 @@ export const checkXRequestedWith = (req:NextApiRequest, res:NextApiResponse) => 
  */
 export const requestVtecx = async (method:string, url:string, req:NextApiRequest, body:any) => {
   // cookieの値をvte.cxへのリクエストヘッダに設定
-  const cookie = req.headers["cookie"]
+  const cookie = req.headers['cookie']
   console.log(`[requestVtecx] cookie=${cookie}`)
   const headers = {'Cookie' : cookie}
   return fetchVtecx(method, url, headers, body)
@@ -46,7 +46,7 @@ export const fetchVtecx = async (method:string, url:string, headers:any, body:an
   console.log(`[fetchVtecx] url=${process.env.VTECX_URL}${url}`)
   headers['X-Requested-With'] = 'XMLHttpRequest'
   const apiKey = process.env.VTECX_APIKEY
-  if (apiKey != null) {
+  if (apiKey) {
     headers['Authorization'] = `APIKey ${apiKey}`
   }
   console.log(`[fetchVtecx] headers = ${headers}`)

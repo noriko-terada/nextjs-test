@@ -8,8 +8,8 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse) {
     return
   }
   // キーを取得
-  let uri = req.query["uri"]
-  if (uri != null) {
+  let uri = req.query['uri']
+  if (uri) {
     console.log(`[deleteentry] uri=${uri}`)
   } else {
     uri = '/'
@@ -19,6 +19,6 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse) {
   const url = `/p${uri}?e`
   const response = await requestVtecx(method, url, req, null)
   const feed = await response.json()
-  console.log("[deleteentry] end.")
+  console.log('[deleteentry] end.')
   res.status(response.status).json(feed)
 }

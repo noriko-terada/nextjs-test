@@ -13,6 +13,6 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse) {
   const response = await requestVtecx(method, url, req, null)
   const feed = await response.json()
 
-  console.log("[logout] end.")
+  console.log('[logout] end.')
   res.status(response.status).json(feed)
 }

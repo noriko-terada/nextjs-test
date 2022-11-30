@@ -11,7 +11,7 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse) {
   let uri = ''
   let param = ''
   for (const tmpkey in req.query) {
-    if (tmpkey === "uri") {
+    if (tmpkey === 'uri') {
       uri = `${req.query[tmpkey]}`
     } else {
       param = `${param}&${tmpkey}=${req.query[tmpkey]}`
@@ -24,6 +24,6 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse) {
   const url = `/p${uri}?c${param}`
   const response = await requestVtecx(method, url, req, null)
   const feed = await response.json()
-    console.log("[getcount] end.")
+    console.log('[getcount] end.')
     res.status(response.status).json(feed)
 }
