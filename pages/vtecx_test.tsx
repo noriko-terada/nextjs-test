@@ -53,7 +53,7 @@ export default function HomePage() {
       value: "deleteentry",
     },
     {
-      label: "logout",
+      label: "logout (/d)",
       value: "logout",
     },
   ];
