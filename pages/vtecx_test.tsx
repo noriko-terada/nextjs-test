@@ -104,17 +104,6 @@ export default function HomePage() {
     }
 
     if (method != null) {
-      /*
-      const promise = request(method, action, body)
-      promise.then((data) => {
-        const feedStr = JSON.stringify(data)
-        console.log(`[doRequest] data=${feedStr}`)
-        setResult(feedStr)
-      }).catch((err) => {
-        console.log(`[doRequest] err=${err}`)
-        setResult('Error occured.')
-      })
-      */
       const data = await request(method, action, body)
       const feedStr = JSON.stringify(data)
       console.log(`[doRequest] data=${feedStr}`)
@@ -124,14 +113,6 @@ export default function HomePage() {
       setResult(`no action: ${action}`)
     }
   }
-  
-  /*
-  const handleClick = async () => {
-    console.log(`[handleClick start]`)
-    doRequest()
-    console.log(`[handleClick end]`)
-  }
-  */
   
   const sizeText = 54
   const rowTextarea = 5

@@ -44,12 +44,12 @@ export default function HomePage() {
     const it = response.headers.entries()
     let tmp = it.next()
     while (!tmp.done) {
-      console.log(`[login] response.header = ${tmp.value[0]} : ${tmp.value[1]}`)
+      //console.log(`[login] response.header = ${tmp.value[0]} : ${tmp.value[1]}`)
       tmp = it.next()
     }
 
-    const cookie = response.headers.get('set-cookie')
-    console.log(`[login] set-cookie:${cookie}`)
+    //const cookie = response.headers.get('set-cookie')
+    //console.log(`[login] set-cookie:${cookie}`)
 
     console.log(data)
     if ('feed' in data) {
@@ -88,6 +88,12 @@ export default function HomePage() {
             <td><label>Password: </label></td>
             <td><input type="password" id="pswrd" name="pswrd" value={pswrd}
                        onChange={(event) => setPswrd(event.target.value)} /></td>
+          </tr>
+          <tr>
+            <td><label></label></td>
+            <td><label className="recaptcha">This site is protected by reCAPTCHA and the Google
+                       <a href="https://policies.google.com/privacy">Privacy Policy</a> and
+                       <a href="https://policies.google.com/terms">Terms of Service</a> apply.</label></td>
           </tr>
         </tbody>
       </table>
