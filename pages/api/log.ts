@@ -1,21 +1,16 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 //import { checkXRequestedWith, requestVtecx } from 'utils/utils'
-import * as vtecxnextapi from 'utils/vtecxnextapi'
+import * as vtecxnext from 'utils/vtecxnext'
+import { VtecxNextError } from 'utils/vtecxnext'
 
 export default async function handler(req:NextApiRequest, res:NextApiResponse) {
   console.log(`[log] start. x-requested-with=${req.headers['x-requested-with']}`)
   // X-Requested-With ヘッダチェック
-  if (!vtecxnextapi.checkXRequestedWith(req, res)) {
+  if (!vtecxnext.checkXRequestedWith(req, res)) {
     return
   }
   // vte.cxへリクエスト
   console.log(`[log] body : ${req.body}`)
-  /*
-  const method = 'POST'
-  const url = `/p/?_log`
-  const response = await requestVtecx(method, url, req, req.body)
-  const feed = await response.json()
-  */
 
   const bodyJson = JSON.parse(req.body)
   const message = bodyJson[0].summary
@@ -23,9 +18,28 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse) {
   const subtitle = bodyJson[0].subtitle
 
   console.log(`[log] message=${message} title=${title} subtitle=${subtitle}`)
-  const response = await vtecxnextapi.log(req, message, title, subtitle)
-  const feed = await response.json()
+  //const response = await vtecxnext.log(req, message, title, subtitle)
+  //const feed = await response.json()
+
+  let resStatus:number
+  let resMessage:string
+  try {
+    await vtecxnext.log(req, message, title, subtitle)
+    resStatus = 200
+    resMessage = 'post log entry.'
+  } catch (error) {
+    console.log(`[log] Error occured. ${error}`)
+    if (error instanceof VtecxNextError) {
+      console.log(`[log] error occured. status=${error.status} ${error.message}`)
+      resStatus = error.status
+      resMessage = error.message
+    } else {
+      resStatus = 503
+      resMessage = 'Error occured.'
+    }
+  }
+  const feed = {feed : {'title' : resMessage}}
 
   console.log('[log] end.')
-  res.status(response.status).json(feed)
+  res.status(resStatus).json(feed)
 }
