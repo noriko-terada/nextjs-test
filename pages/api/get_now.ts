@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 
-export default async function handler(req:NextApiRequest, res:NextApiResponse) {
+const handler = async (req:NextApiRequest, res:NextApiResponse) => {
     console.log(`[get_now] start. x-requested-with=${req.headers['x-requested-with']}`)
     // X-Requested-With ヘッダがない場合エラー
     if (req.headers['x-requested-with'] == null) {
@@ -21,3 +21,5 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse) {
       res.status(200).json(feed)
     }
 }
+
+export default handler

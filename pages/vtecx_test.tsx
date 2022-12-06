@@ -1,11 +1,13 @@
 import { useState } from 'react';
-import { getAuthToken } from 'vtecxauth'
+import { GetServerSideProps, GetServerSidePropsContext } from 'next'
+import * as vtecxnext from 'utils/vtecxnext'  // getServerSideProps で使用
+import { isPropertySignature } from 'typescript';
 
 function Header({title} : {title:string}) {
   return <h1>{title ? title : 'Default title'}</h1>;
 }
 
-export default function HomePage() {
+const HomePage = (props:Props) => {
   const [action, setAction] = useState('');
   const [urlparam, setUrlparam] = useState('');
   const [reqdata, setReqdata] = useState('');
@@ -13,48 +15,52 @@ export default function HomePage() {
 
   const options = [
     {
-      label: "--- 選択してください ---",
-      value: "select",
+      label: '--- 選択してください ---',
+      value: 'select',
     },
     {
-      label: "uid (/d)",
-      value: "uid",
+      label: 'uid (/d)',
+      value: 'uid',
     },
     {
-      label: "whoami (/d)",
-      value: "whoami",
+      label: 'whoami (/d)',
+      value: 'whoami',
     },
     {
-      label: "post log (リクエストデータ)",
-      value: "log",
+      label: 'is logged in',
+      value: 'isloggedin',
     },
     {
-      label: "get entry (URLパラメータ:uri)",
-      value: "getentry",
+      label: 'post log (リクエストデータ)',
+      value: 'log',
     },
     {
-      label: "get feed (URLパラメータ:uri={キー}[&検索条件])",
-      value: "getfeed",
+      label: 'get entry (URLパラメータ:uri)',
+      value: 'getentry',
     },
     {
-      label: "get count (URLパラメータ:uri={キー}[&検索条件])",
-      value: "getcount",
+      label: 'get feed (URLパラメータ:uri={キー}[&検索条件])',
+      value: 'getfeed',
     },
     {
-      label: "post entry (リクエストデータ、[URLパラメータ:uri={キー}])",
-      value: "postentry",
+      label: 'get count (URLパラメータ:uri={キー}[&検索条件])',
+      value: 'getcount',
     },
     {
-      label: "put entry (リクエストデータ)",
-      value: "putentry",
+      label: 'post entry (リクエストデータ、[URLパラメータ:uri={キー}])',
+      value: 'postentry',
     },
     {
-      label: "delete entry (URLパラメータ:uri={キー})",
-      value: "deleteentry",
+      label: 'put entry (リクエストデータ)',
+      value: 'putentry',
     },
     {
-      label: "logout (/d)",
-      value: "logout",
+      label: 'delete entry (URLパラメータ:uri={キー})',
+      value: 'deleteentry',
+    },
+    {
+      label: 'logout (/d)',
+      value: 'logout',
     },
   ];
 
@@ -90,8 +96,8 @@ export default function HomePage() {
     let method
     let apiAction
     let body
-    if (action === 'uid' || action === 'whoami' || action === 'getentry' || action === 'getfeed' ||
-        action === 'getcount' || action === 'logout') {
+    if (action === 'uid' || action === 'whoami' || action === 'isloggedin' || action === 'getentry' || 
+        action === 'getfeed' || action === 'getcount' || action === 'logout') {
       method = 'GET'
     } else if (action === 'log' || action === 'postentry') {
       method = 'POST'
@@ -117,10 +123,14 @@ export default function HomePage() {
   const sizeText = 54
   const rowTextarea = 5
   const colsTextarea = 50
+  console.log(`[HomePage] props.isLoggedin=${props.isLoggedin}`)
 
   return (
     <div>
       <Header title="vte.cx 汎用APIテスト" />
+      <label>【getServerSideProps】 is logged in: {props.isLoggedin}</label>
+      <br/>
+      <br/>
       <select name="action" value={action} onChange={(e) => setAction(e.target.value)}>
         {options.map((option) => (
           <option key={option.value} value={option.value}>{option.label}</option>
@@ -152,3 +162,25 @@ export default function HomePage() {
     </div>
   );
 }
+
+// propsの型を定義する
+type Props = {
+  isLoggedin?: string
+}
+
+// サーバサイドで実行する処理(getServerSideProps)を定義する
+export const getServerSideProps:GetServerSideProps = async (context:GetServerSidePropsContext) => {
+  // vtecxnext 呼び出し
+  const isLoggedin = await vtecxnext.isLoggedin(context.req)
+
+  const props: Props = {
+    isLoggedin: String(isLoggedin)
+  }
+  console.log(`[getServerSideProps] props.isLoggedin=${props.isLoggedin}`)
+
+  return {
+    props: props,
+  }
+}
+
+export default HomePage

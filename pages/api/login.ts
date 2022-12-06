@@ -1,5 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next'
-import { checkXRequestedWith, fetchVtecx } from 'utils/utils'
+//import { checkXRequestedWith, fetchVtecx } from 'utils/utils'
+import * as vtecxnext from 'utils/vtecxnext'
+import { VtecxNextError } from 'utils/vtecxnext'
 
 /**
  * ログイン処理.
@@ -7,15 +9,14 @@ import { checkXRequestedWith, fetchVtecx } from 'utils/utils'
  * @param res レスポンス
  * @returns ログイン成功の場合、SIDをSet-Cookieする。
  */
-export default async function handler(req:NextApiRequest, res:NextApiResponse) {
+const handler = async (req:NextApiRequest, res:NextApiResponse) => {
   // X-Requested-With ヘッダチェック
-  if (!checkXRequestedWith(req, res)) {
+  if (!vtecxnext.checkXRequestedWith(req, res)) {
     return
   }
-
   // リクエストヘッダからWSSEを取得
-  const wsse = req.headers['x-wsse']
-  const reCaptchaToken = req.query['g-recaptcha-token']
+  const wsse = String(req.headers['x-wsse'])
+  const reCaptchaToken = String(req.query['g-recaptcha-token'])
   const param = reCaptchaToken ? `&g-recaptcha-token=${reCaptchaToken}` : ''
   console.log(`[login] x-wsse=${wsse}`)
   if (wsse == null) {
@@ -23,26 +24,26 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse) {
     res.status(400).json({feed : {title: 'Authentication is required.'}})
     return
   }
-  
-  const method = 'GET'
-  const url = `/d/?_login${param}`
-  const headers = {'X-WSSE' : `${wsse}`}
-  const response = await fetchVtecx(method, url, headers, null)
-  const feed = await response.json()
-  // レスポンスヘッダの値のうち、'content-type'、'set-cookie'、'x-'で始まるものをセット
-  const it = response.headers.entries()
-  let tmp = it.next()
-  while (!tmp.done) {
-    const name = tmp.value[0]
-    const val = tmp.value[1]
-    console.log(`[login] response.header = ${name} : ${val}`)
-    if (name.startsWith('x-') || name === 'set-cookie' || name === 'content-type') {
-      console.log(`[login] (set) response.header = ${name} : ${val}`)
-      res.setHeader(name, val)
+  // ログイン
+  let resStatus:number
+  let resMessage:string
+  try {
+    const isLoggedin = await vtecxnext.login(req, res, wsse, reCaptchaToken)
+    resMessage = isLoggedin ? 'Logged in!' : 'login failed.'
+    resStatus = 200
+  } catch (error) {
+    if (error instanceof VtecxNextError) {
+      console.log(`[login] Error occured. status=${error.status} ${error.message}`)
+      resStatus = error.status
+      resMessage = error.message
+    } else {
+      console.log(`[login] Error occured. (not VtecxNextError) ${error}`)
+      resStatus = 503
+      resMessage = 'Error occured.'
     }
-    tmp = it.next()
   }
-
-  console.log('[login] end.')
-  res.status(response.status).json(feed)
+  const resJson = {feed : {'title' : resMessage}}
+  res.status(resStatus).json(resJson)
 }
+
+export default handler

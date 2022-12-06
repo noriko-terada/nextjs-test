@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import { checkXRequestedWith, requestVtecx } from 'utils/utils'
 
-export default async function handler(req:NextApiRequest, res:NextApiResponse) {
+const handler = async (req:NextApiRequest, res:NextApiResponse) => {
   console.log(`[deleteentry] start. x-requested-with=${req.headers['x-requested-with']}`)
   // X-Requested-With ヘッダチェック
   if (!checkXRequestedWith(req, res)) {
@@ -22,3 +22,5 @@ export default async function handler(req:NextApiRequest, res:NextApiResponse) {
   console.log('[deleteentry] end.')
   res.status(response.status).json(feed)
 }
+
+export default handler

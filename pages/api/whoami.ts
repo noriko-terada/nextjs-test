@@ -1,17 +1,36 @@
 import { NextApiRequest, NextApiResponse } from 'next'
-import { checkXRequestedWith, requestVtecx } from 'utils/utils'
+//import { checkXRequestedWith, requestVtecx } from 'utils/utils'
+import * as vtecxnext from 'utils/vtecxnext'
+import { VtecxNextError } from 'utils/vtecxnext'
 
-export default async function handler(req:NextApiRequest, res:NextApiResponse) {
+const handler = async (req:NextApiRequest, res:NextApiResponse) => {
   console.log(`[whoami] start. x-requested-with=${req.headers['x-requested-with']}`)
   // X-Requested-With ヘッダチェック
-  if (!checkXRequestedWith(req, res)) {
+  if (!vtecxnext.checkXRequestedWith(req, res)) {
     return
   }
-  // vte.cxへリクエスト
-  const method = 'GET'
-  const url = '/d/?_whoami'
-  const response = await requestVtecx(method, url, req, null)
-  const feed = await response.json()
+  // whoami
+  let resStatus:number
+  let resJson:any
+  try {
+    resJson = await vtecxnext.whoami(req)
+    resStatus = 200
+  } catch (error) {
+    let resErrMsg:string
+    if (error instanceof VtecxNextError) {
+      console.log(`[whoami] Error occured. status=${error.status} ${error.message}`)
+      resStatus = error.status
+      resErrMsg = error.message
+    } else {
+      console.log(`[whoami] Error occured. (not VtecxNextError) ${error}`)
+      resStatus = 503
+      resErrMsg = 'Error occured.'
+    }
+    resJson = {feed : {'title' : resErrMsg}}
+  }
+
   console.log('[whoami] end.')
-  res.status(response.status).json(feed)
+  res.status(resStatus).json(resJson)
 }
+
+export default handler

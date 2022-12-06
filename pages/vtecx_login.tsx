@@ -11,7 +11,7 @@ function Header({title} : {title:string}) {
  * ページ関数
  * @returns HTML
  */
-export default function HomePage() {
+ const HomePage = () => {
   const [username, setUsername] = useState('')
   const [pswrd, setPswrd] = useState('')
   const [result, setResult] = useState('')
@@ -103,3 +103,5 @@ export default function HomePage() {
     </div>
   );
 }
+
+export default HomePage
