@@ -1,5 +1,4 @@
 import { NextApiRequest, NextApiResponse } from 'next'
-//import { checkXRequestedWith, requestVtecx } from 'utils/utils'
 import * as vtecxnext from 'utils/vtecxnext'
 import { VtecxNextError } from 'utils/vtecxnext'
 
@@ -10,14 +9,15 @@ const handler = async (req:NextApiRequest, res:NextApiResponse) => {
     return
   }
   // キーを取得
-  const uri = req.query['uri']
+  const tmpUri = req.query['uri']
+  const uri:string = tmpUri ? String(tmpUri) : ''
   console.log(`[getentry] uri=${uri}`)
   // エントリー取得
   let resStatus:number
   let resJson:any
   try {
-    resJson = await vtecxnext.getEntry(req, uri)
-    resStatus = 200
+    resJson = await vtecxnext.getEntry(req, res, uri)
+    resStatus = resJson ? 200 : 204
   } catch (error) {
     let resErrMsg:string
     if (error instanceof VtecxNextError) {
@@ -33,7 +33,9 @@ const handler = async (req:NextApiRequest, res:NextApiResponse) => {
   }
 
   console.log('[getentry] end.')
-  res.status(resStatus).json(resJson)
+  res.status(resStatus)
+  resJson ? res.json(resJson) : 
+  res.end()
 }
 
 export default handler

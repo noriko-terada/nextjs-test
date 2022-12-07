@@ -1,27 +1,41 @@
 import { NextApiRequest, NextApiResponse } from 'next'
-import { checkXRequestedWith, requestVtecx } from 'utils/utils'
+import * as vtecxnext from 'utils/vtecxnext'
+import { VtecxNextError } from 'utils/vtecxnext'
 
 const handler = async (req:NextApiRequest, res:NextApiResponse) => {
   console.log(`[postentry] start. x-requested-with=${req.headers['x-requested-with']}`)
   // X-Requested-With ヘッダチェック
-  if (!checkXRequestedWith(req, res)) {
+  if (!vtecxnext.checkXRequestedWith(req, res)) {
     return
   }
   // キーを取得
-  let uri = req.query['uri']
-  if (!uri) {
-    console.log(`[postentry] uri=${uri}`)
-  } else {
-    uri = '/'
+  const tmpUri = req.query['uri']
+  const uri:string = tmpUri ? String(tmpUri) : ''
+  console.log(`[postentry] uri=${uri}`)
+
+  // 登録
+  let resStatus:number
+  let resJson:any
+  try {
+    resJson = await vtecxnext.post(req, res, req.body, uri)
+    resStatus = 200
+  } catch (error) {
+    let resErrMsg:string
+    if (error instanceof VtecxNextError) {
+      console.log(`[postentry] Error occured. status=${error.status} ${error.message}`)
+      resStatus = error.status
+      resErrMsg = error.message
+    } else {
+      console.log(`[postentry] Error occured. (not VtecxNextError) ${error}`)
+      resStatus = 503
+      resErrMsg = 'Error occured.'
+    }
+    resJson = {feed : {'title' : resErrMsg}}
   }
-  // vte.cxへリクエスト
-  console.log(`[postentry] body : ${req.body}`)
-  const method = 'POST'
-  const url = `/p${uri}?e`
-  const response = await requestVtecx(method, url, req, req.body)
-  const feed = await response.json()
+
   console.log('[postentry] end.')
-  res.status(response.status).json(feed)
+  res.status(resStatus).json(resJson)
+  res.end()
 }
 
 export default handler

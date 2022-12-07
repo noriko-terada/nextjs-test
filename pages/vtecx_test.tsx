@@ -23,6 +23,10 @@ const HomePage = (props:Props) => {
       value: 'uid',
     },
     {
+      label: 'uid2 (run twice) (/d)',
+      value: 'uid2',
+    },
+    {
       label: 'whoami (/d)',
       value: 'whoami',
     },
@@ -47,7 +51,7 @@ const HomePage = (props:Props) => {
       value: 'getcount',
     },
     {
-      label: 'post entry (リクエストデータ、[URLパラメータ:uri={キー}])',
+      label: 'post entry (リクエストデータ、[URLパラメータ:uri={親キー}])',
       value: 'postentry',
     },
     {
@@ -55,8 +59,12 @@ const HomePage = (props:Props) => {
       value: 'putentry',
     },
     {
-      label: 'delete entry (URLパラメータ:uri={キー})',
+      label: 'delete entry (URLパラメータ:uri={キー}[&r={リビジョン}])',
       value: 'deleteentry',
+    },
+    {
+      label: 'delete folder (URLパラメータ:uri={親キー})',
+      value: 'deletefolder',
     },
     {
       label: 'logout (/d)',
@@ -84,7 +92,13 @@ const HomePage = (props:Props) => {
     const response = await fetch(`api/${apiAction}?${urlparam}`, requestInit)
 
     console.log(`[request] response. ${response}`)
-    const data = await response.json()
+    const status = response.status
+    let data
+    if (status === 204) {
+      data = null
+    } else {
+      data = await response.json()
+    }
     console.log(data)
     return data
   }
@@ -94,9 +108,9 @@ const HomePage = (props:Props) => {
     console.log(`[doRequest] start. action=${action}`)
     // selectの値を取得
     let method
-    let apiAction
     let body
-    if (action === 'uid' || action === 'whoami' || action === 'isloggedin' || action === 'getentry' || 
+    if (action === 'uid' || action === 'uid2' || action === 'whoami' || 
+        action === 'isloggedin' || action === 'getentry' || 
         action === 'getfeed' || action === 'getcount' || action === 'logout') {
       method = 'GET'
     } else if (action === 'log' || action === 'postentry') {
@@ -105,7 +119,7 @@ const HomePage = (props:Props) => {
     } else if (action === 'putentry') {
       method = 'PUT'
       body = reqdata
-    } else if (action === 'deleteentry') {
+    } else if (action === 'deleteentry' || action === 'deletefolder') {
       method = 'DELETE'
     }
 
@@ -123,7 +137,7 @@ const HomePage = (props:Props) => {
   const sizeText = 54
   const rowTextarea = 5
   const colsTextarea = 50
-  console.log(`[HomePage] props.isLoggedin=${props.isLoggedin}`)
+  //console.log(`[HomePage] props.isLoggedin=${props.isLoggedin}`)
 
   return (
     <div>
@@ -171,7 +185,7 @@ type Props = {
 // サーバサイドで実行する処理(getServerSideProps)を定義する
 export const getServerSideProps:GetServerSideProps = async (context:GetServerSidePropsContext) => {
   // vtecxnext 呼び出し
-  const isLoggedin = await vtecxnext.isLoggedin(context.req)
+  const isLoggedin = await vtecxnext.isLoggedin(context.req, context.res)
 
   const props: Props = {
     isLoggedin: String(isLoggedin)

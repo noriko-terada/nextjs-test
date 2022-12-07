@@ -1,5 +1,4 @@
 import { NextApiRequest, NextApiResponse } from 'next'
-//import { checkXRequestedWith, requestVtecx } from 'utils/utils'
 import * as vtecxnext from 'utils/vtecxnext'
 import { VtecxNextError } from 'utils/vtecxnext'
 
@@ -13,7 +12,7 @@ const handler = async (req:NextApiRequest, res:NextApiResponse) => {
   let resStatus:number
   let resJson:any
   try {
-    resJson = await vtecxnext.whoami(req)
+    resJson = await vtecxnext.whoami(req, res)
     resStatus = 200
   } catch (error) {
     let resErrMsg:string
@@ -31,6 +30,7 @@ const handler = async (req:NextApiRequest, res:NextApiResponse) => {
 
   console.log('[whoami] end.')
   res.status(resStatus).json(resJson)
+  res.end()
 }
 
 export default handler

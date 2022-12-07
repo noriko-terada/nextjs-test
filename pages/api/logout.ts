@@ -1,5 +1,4 @@
 import { NextApiRequest, NextApiResponse } from 'next'
-//import { checkXRequestedWith, requestVtecx } from 'utils/utils'
 import * as vtecxnext from 'utils/vtecxnext'
 import { VtecxNextError } from 'utils/vtecxnext'
 
@@ -29,6 +28,7 @@ const handler = async (req:NextApiRequest, res:NextApiResponse) => {
   }
   const resJson = {feed : {'title' : resMessage}}
   res.status(resStatus).json(resJson)
+  res.end()
 }
 
 export default handler

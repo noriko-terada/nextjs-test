@@ -1,10 +1,11 @@
 import { NextApiRequest, NextApiResponse } from 'next'
-import { checkXRequestedWith, requestVtecx } from 'utils/utils'
+import * as vtecxnext from 'utils/vtecxnext'
+import { VtecxNextError } from 'utils/vtecxnext'
 
 const handler = async (req:NextApiRequest, res:NextApiResponse) => {
     console.log(`[getcount] start. x-requested-with=${req.headers['x-requested-with']}`)
   // X-Requested-With ヘッダチェック
-  if (!checkXRequestedWith(req, res)) {
+  if (!vtecxnext.checkXRequestedWith(req, res)) {
     return
   }
   // リクエストパラメータ
@@ -14,18 +15,35 @@ const handler = async (req:NextApiRequest, res:NextApiResponse) => {
     if (tmpkey === 'uri') {
       uri = `${req.query[tmpkey]}`
     } else {
-      param = `${param}&${tmpkey}=${req.query[tmpkey]}`
+      param = `${param}${param ? '&' : '?'}${tmpkey}=${req.query[tmpkey]}`
     }
   }
   console.log(`[getcount] uri=${uri}`)
   console.log(`[getcount] param=${param}`)
-  // vte.cxへリクエスト
-  const method = 'GET'
-  const url = `/p${uri}?c${param}`
-  const response = await requestVtecx(method, url, req, null)
-  const feed = await response.json()
-    console.log('[getcount] end.')
-    res.status(response.status).json(feed)
+
+  // 件数取得
+  let resStatus:number
+  let resMessage:string
+  try {
+    const requesturi = `${uri}${param}`
+    resMessage = await vtecxnext.count(req, res, requesturi)
+    resStatus = 200
+  } catch (error) {
+    if (error instanceof VtecxNextError) {
+      console.log(`[getcount] Error occured. status=${error.status} ${error.message}`)
+      resStatus = error.status
+      resMessage = error.message
+    } else {
+      console.log(`[getcount] Error occured. (not VtecxNextError) ${error}`)
+      resStatus = 503
+      resMessage = 'Error occured.'
+    }
+  }
+  const feed = {feed : {'title' : resMessage}}
+
+  console.log('[getcount] end.')
+  res.status(resStatus).json(feed)
+  res.end()
 }
 
 export default handler

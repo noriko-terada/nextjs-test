@@ -1,5 +1,4 @@
 import { NextApiRequest, NextApiResponse } from 'next'
-//import { checkXRequestedWith, requestVtecx } from 'utils/utils'
 import * as vtecxnext from 'utils/vtecxnext'
 import { VtecxNextError } from 'utils/vtecxnext'
 
@@ -13,7 +12,7 @@ const handler = async (req:NextApiRequest, res:NextApiResponse) => {
   let resStatus:number
   let resMessage:string
   try {
-    const isloggedin = await vtecxnext.isLoggedin(req)
+    const isloggedin = await vtecxnext.isLoggedin(req, res)
     resMessage = String(isloggedin)
     resStatus = 200
   } catch (error) {
@@ -31,6 +30,7 @@ const handler = async (req:NextApiRequest, res:NextApiResponse) => {
 
   console.log('[isloggedin] end.')
   res.status(resStatus).json(feed)
+  res.end()
 }
 
 export default handler

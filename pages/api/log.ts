@@ -21,7 +21,7 @@ const handler = async (req:NextApiRequest, res:NextApiResponse) => {
   let resStatus:number
   let resMessage:string
   try {
-    await vtecxnext.log(req, message, title, subtitle)
+    await vtecxnext.log(req, res, message, title, subtitle)
     resStatus = 200
     resMessage = 'post log entry.'
   } catch (error) {
@@ -39,6 +39,7 @@ const handler = async (req:NextApiRequest, res:NextApiResponse) => {
 
   console.log('[log] end.')
   res.status(resStatus).json(feed)
+  res.end()
 }
 
 export default handler
