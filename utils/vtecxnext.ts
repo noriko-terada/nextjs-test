@@ -740,15 +740,15 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
  * @param name name
  * @return true if successful
  */
- export const deleteSessioLong = async (req:IncomingMessage, res:ServerResponse, name:string) => {
-  console.log(`[vtecxnext deleteSessioLong] start. name=${name}`)
+ export const deleteSessionLong = async (req:IncomingMessage, res:ServerResponse, name:string) => {
+  console.log(`[vtecxnext deleteSessionLong] start. name=${name}`)
   // 入力チェック
   checkNotNull(name, 'Name')
   // vte.cxへリクエスト
   const method = 'DELETE'
   const url = `/p?_sessionlong=${name}`
   const response = await requestVtecx(method, url, req)
-  console.log(`[vtecxnext deleteSessioLong] response. status=${response.status}`)
+  console.log(`[vtecxnext deleteSessionLong] response. status=${response.status}`)
   // vte.cxからのset-cookieを転記
   setCookie(response, res)
   // レスポンスのエラーチェック
