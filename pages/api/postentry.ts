@@ -8,7 +8,7 @@ const handler = async (req:NextApiRequest, res:NextApiResponse) => {
   if (!vtecxnext.checkXRequestedWith(req, res)) {
     return
   }
-  // キーを取得
+  // 引数を取得
   const tmpUri = req.query['uri']
   const uri:string = tmpUri ? String(tmpUri) : ''
   console.log(`[postentry] uri=${uri}`)
@@ -16,8 +16,25 @@ const handler = async (req:NextApiRequest, res:NextApiResponse) => {
   // 登録
   let resStatus:number
   let resJson:any
+  let feed
   try {
-    resJson = await vtecxnext.post(req, res, req.body, uri)
+    feed = req.body ? JSON.parse(req.body) : null
+  } catch (e) {
+    let resErrMsg:string
+    if (e instanceof Error) {
+      const error:Error = e
+      resErrMsg = `${error.name}: ${error.message}`
+    } else {
+      resErrMsg = String(e)
+    }
+    resJson = {feed : {'title' : resErrMsg}}
+    res.status(400).json(resJson)
+    res.end()
+    return
+  }
+
+  try {
+    resJson = await vtecxnext.post(req, res, feed, uri)
     resStatus = 200
   } catch (error) {
     let resErrMsg:string

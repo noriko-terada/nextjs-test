@@ -12,8 +12,25 @@ const handler = async (req:NextApiRequest, res:NextApiResponse) => {
   // 更新
   let resStatus:number
   let resJson:any
+  let feed
   try {
-    resJson = await vtecxnext.put(req, res, req.body)
+    feed = req.body ? JSON.parse(req.body) : null
+  } catch (e) {
+    let resErrMsg:string
+    if (e instanceof Error) {
+      const error:Error = e
+      resErrMsg = `${error.name}: ${error.message}`
+    } else {
+      resErrMsg = String(e)
+    }
+    resJson = {feed : {'title' : resErrMsg}}
+    res.status(400).json(resJson)
+    res.end()
+    return
+  }
+
+  try {
+    resJson = await vtecxnext.put(req, res, feed)
     resStatus = 200
   } catch (error) {
     let resErrMsg:string

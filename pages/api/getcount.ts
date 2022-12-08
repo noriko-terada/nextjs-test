@@ -26,7 +26,7 @@ const handler = async (req:NextApiRequest, res:NextApiResponse) => {
   let resMessage:string
   try {
     const requesturi = `${uri}${param}`
-    resMessage = await vtecxnext.count(req, res, requesturi)
+    resMessage = String(await vtecxnext.count(req, res, requesturi))
     resStatus = 200
   } catch (error) {
     if (error instanceof VtecxNextError) {

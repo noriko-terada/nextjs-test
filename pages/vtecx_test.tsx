@@ -67,6 +67,30 @@ const HomePage = (props:Props) => {
       value: 'deletefolder',
     },
     {
+      label: 'allocids (URLパラメータ:uri={キー}&num={採番数})',
+      value: 'allocids',
+    },
+    {
+      label: 'addids (URLパラメータ:uri={キー}&num={加算数})',
+      value: 'addids',
+    },
+    {
+      label: 'getids (URLパラメータ:uri={キー})',
+      value: 'getids',
+    },
+    {
+      label: 'setids (URLパラメータ:uri={キー}&num={加算設定数})',
+      value: 'setids',
+    },
+    {
+      label: 'rangeids (URLパラメータ:uri={キー}&range={加算枠})',
+      value: 'rangeids',
+    },
+    {
+      label: 'getrangeids (URLパラメータ:uri={キー})',
+      value: 'getrangeids',
+    },
+    {
       label: 'logout (/d)',
       value: 'logout',
     },
@@ -110,13 +134,15 @@ const HomePage = (props:Props) => {
     let method
     let body
     if (action === 'uid' || action === 'uid2' || action === 'whoami' || 
-        action === 'isloggedin' || action === 'getentry' || 
-        action === 'getfeed' || action === 'getcount' || action === 'logout') {
+        action === 'isloggedin' || action === 'logout' || 
+        action === 'getentry' || action === 'getfeed' || action === 'getcount' ||
+        action === 'allocids' || action === 'getids' || action === 'getrangeids') {
       method = 'GET'
     } else if (action === 'log' || action === 'postentry') {
       method = 'POST'
       body = reqdata
-    } else if (action === 'putentry') {
+    } else if (action === 'putentry' || action === 'addids' || action === 'setids' || 
+        action === 'rangeids') {
       method = 'PUT'
       body = reqdata
     } else if (action === 'deleteentry' || action === 'deletefolder') {
