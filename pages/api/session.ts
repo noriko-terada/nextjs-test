@@ -17,7 +17,7 @@ const handler = async (req:NextApiRequest, res:NextApiResponse) => {
   const type:string = testutil.getParam(req, 'type')
   console.log(`[session] method=${method} name=${name} type=${type}`)
   // セッション操作
-  let resStatus:number
+  let resStatus:number = 200
   let resJson:any
   try {
     if (method === 'GET') {
@@ -32,7 +32,6 @@ const handler = async (req:NextApiRequest, res:NextApiResponse) => {
         const result = await vtecxnext.getSessionString(req, res, name)
         if (result) {
           resJson = {feed : {'title' : result}}
-          resStatus = 200
         } else {
           resStatus = 204
         }
@@ -40,7 +39,6 @@ const handler = async (req:NextApiRequest, res:NextApiResponse) => {
         const result = await vtecxnext.getSessionLong(req, res, name)
         if (result) {
           resJson = {feed : {'title' : result}}
-          resStatus = 200
         } else {
           resStatus = 204
         }
@@ -70,7 +68,6 @@ const handler = async (req:NextApiRequest, res:NextApiResponse) => {
         throw new ApiRouteTestError(400, `[session] invalid type. ${type}`)
       }
       resJson = {feed : {'title' : message}}
-      resStatus = 200
 
     } else if (method === 'DELETE') {
       let result
@@ -87,7 +84,6 @@ const handler = async (req:NextApiRequest, res:NextApiResponse) => {
         throw new ApiRouteTestError(400, `[session] invalid type. ${type}`)
       }
       resJson = {feed : {'title' : `session ${type} deleted. name=${name} result=${result}`}}
-      resStatus = 200
     }
 
   } catch (error) {
