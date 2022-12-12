@@ -91,6 +91,58 @@ const HomePage = (props:Props) => {
       value: 'getrangeids',
     },
     {
+      label: 'get session feed (URLパラメータ:name={名前})',
+      value: 'session_get_feed',
+    },
+    {
+      label: 'get session entry (URLパラメータ:name={名前})',
+      value: 'session_get_entry',
+    },
+    {
+      label: 'get session string (URLパラメータ:name={名前})',
+      value: 'session_get_string',
+    },
+    {
+      label: 'get session long (URLパラメータ:name={名前})',
+      value: 'session_get_long',
+    },
+    {
+      label: 'set session feed (リクエストデータ、URLパラメータ:name={名前})',
+      value: 'session_put_feed',
+    },
+    {
+      label: 'set session entry (リクエストデータ、URLパラメータ:name={名前})',
+      value: 'session_put_entry',
+    },
+    {
+      label: 'set session string (URLパラメータ:name={名前}&val={値})',
+      value: 'session_put_string',
+    },
+    {
+      label: 'set session long (URLパラメータ:name={名前}&val={数値})',
+      value: 'session_put_long',
+    },
+    {
+      label: 'increment session (URLパラメータ:name={名前}&val={数値})',
+      value: 'session_put_incr',
+    },
+    {
+      label: 'delete session feed (URLパラメータ:name={名前})',
+      value: 'session_delete_feed',
+    },
+    {
+      label: 'delete session entry (URLパラメータ:name={名前})',
+      value: 'session_delete_entry',
+    },
+    {
+      label: 'delete session string (URLパラメータ:name={名前})',
+      value: 'session_delete_string',
+    },
+    {
+      label: 'delete session long (URLパラメータ:name={名前})',
+      value: 'session_delete_long',
+    },
+    {
       label: 'logout (/d)',
       value: 'logout',
     },
@@ -101,9 +153,10 @@ const HomePage = (props:Props) => {
    * @param method メソッド
    * @param apiAction サーバサイドJS名
    * @param body リクエストデータ
+   * @param additionalParam 追加パラメータ
    * @returns レスポンスJSON
    */
-  const request = async (method:string, apiAction:string, body:any) => {
+  const request = async (method:string, apiAction:string, body?:any, additionalParam?:string) => {
     console.log('[request] start.')
     const requestInit:RequestInit = {
       body: body,
@@ -113,7 +166,7 @@ const HomePage = (props:Props) => {
       }
     }
   
-    const response = await fetch(`api/${apiAction}?${urlparam}`, requestInit)
+    const response = await fetch(`api/${apiAction}?${urlparam}${urlparam ? '&' : ''}${additionalParam}`, requestInit)
 
     console.log(`[request] response. ${response}`)
     const status = response.status
@@ -133,24 +186,43 @@ const HomePage = (props:Props) => {
     // selectの値を取得
     let method
     let body
+    let apiAction
+    let additionalParam
     if (action === 'uid' || action === 'uid2' || action === 'whoami' || 
         action === 'isloggedin' || action === 'logout' || 
         action === 'getentry' || action === 'getfeed' || action === 'getcount' ||
         action === 'allocids' || action === 'getids' || action === 'getrangeids') {
       method = 'GET'
+      apiAction = action
     } else if (action === 'log' || action === 'postentry') {
       method = 'POST'
       body = reqdata
+      apiAction = action
     } else if (action === 'putentry' || action === 'addids' || action === 'setids' || 
         action === 'rangeids') {
       method = 'PUT'
       body = reqdata
+      apiAction = action
     } else if (action === 'deleteentry' || action === 'deletefolder') {
       method = 'DELETE'
+      apiAction = action
+    } else if (action.startsWith('session_')) {
+      const tmpAction = action.substring(8)
+      console.log(`[request] 'session_' + '${tmpAction}'`)
+      const idx = tmpAction.indexOf('_')
+      method = tmpAction.substring(0, idx)
+      additionalParam = `type=${tmpAction.substring(idx + 1)}`
+      console.log(`[request] method=${method} additionalParam=${additionalParam}`)
+      if (method) {
+        apiAction = 'session'
+        if (method === 'put') {
+          body = reqdata
+        }
+      }
     }
 
-    if (method != null) {
-      const data = await request(method, action, body)
+    if (method != null && apiAction != null) {
+      const data = await request(method, apiAction, body, additionalParam)
       const feedStr = JSON.stringify(data)
       console.log(`[doRequest] data=${feedStr}`)
       setResult(feedStr)

@@ -549,7 +549,7 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
   checkNotNull(feed, 'Feed')
   // vte.cxへリクエスト
   const method = 'PUT'
-  const url = `/p?_sessionfeed=${name}`
+  const url = `/p/?_sessionfeed=${name}`
   const response = await requestVtecx(method, url, req, JSON.stringify(feed))
   console.log(`[vtecxnext setSessionFeed] response. status=${response.status}`)
   // vte.cxからのset-cookieを転記
@@ -574,7 +574,7 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
   checkNotNull(entry, 'Entry')
   // vte.cxへリクエスト
   const method = 'PUT'
-  const url = `/p?_sessionentry=${name}`
+  const url = `/p/?_sessionentry=${name}`
   const feed = {feed : {'entry' : entry}}
   const response = await requestVtecx(method, url, req, JSON.stringify(feed))
   console.log(`[vtecxnext setSessionEntry] response. status=${response.status}`)
@@ -600,7 +600,7 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
   checkNotNull(str, 'String')
   // vte.cxへリクエスト
   const method = 'PUT'
-  const url = `/p?_sessionstring=${name}`
+  const url = `/p/?_sessionstring=${name}`
   const feed = {feed : {'title' : str}}
   const response = await requestVtecx(method, url, req, JSON.stringify(feed))
   console.log(`[vtecxnext setSessionString] response. status=${response.status}`)
@@ -626,8 +626,8 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
   checkNotNull(num, 'Number')
   // vte.cxへリクエスト
   const method = 'PUT'
-  const url = `/p?_sessionlong=${name}`
-  const feed = {feed : {'title' : num}}
+  const url = `/p/?_sessionlong=${name}`
+  const feed = {feed : {'title' : String(num)}}
   const response = await requestVtecx(method, url, req, JSON.stringify(feed))
   console.log(`[vtecxnext setSessionLong] response. status=${response.status}`)
   // vte.cxからのset-cookieを転記
@@ -652,7 +652,7 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
   checkNotNull(num, 'Number')
   // vte.cxへリクエスト
   const method = 'PUT'
-  const url = `/p?_sessionincr=${name}&_num=${num}`
+  const url = `/p/?_sessionincr=${name}&_num=${num}`
   const response = await requestVtecx(method, url, req)
   console.log(`[vtecxnext incrementSession] response. status=${response.status}`)
   // vte.cxからのset-cookieを転記
@@ -677,7 +677,7 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
   checkNotNull(name, 'Name')
   // vte.cxへリクエスト
   const method = 'DELETE'
-  const url = `/p?_sessionfeed=${name}`
+  const url = `/p/?_sessionfeed=${name}`
   const response = await requestVtecx(method, url, req)
   console.log(`[vtecxnext deleteSessionFeed] response. status=${response.status}`)
   // vte.cxからのset-cookieを転記
@@ -700,7 +700,7 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
   checkNotNull(name, 'Name')
   // vte.cxへリクエスト
   const method = 'DELETE'
-  const url = `/p?_sessionentry=${name}`
+  const url = `/p/?_sessionentry=${name}`
   const response = await requestVtecx(method, url, req)
   console.log(`[vtecxnext deleteSessionEntry] response. status=${response.status}`)
   // vte.cxからのset-cookieを転記
@@ -723,7 +723,7 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
   checkNotNull(name, 'Name')
   // vte.cxへリクエスト
   const method = 'DELETE'
-  const url = `/p?_sessionstring=${name}`
+  const url = `/p/?_sessionstring=${name}`
   const response = await requestVtecx(method, url, req)
   console.log(`[vtecxnext deleteSessionString] response. status=${response.status}`)
   // vte.cxからのset-cookieを転記
@@ -746,7 +746,7 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
   checkNotNull(name, 'Name')
   // vte.cxへリクエスト
   const method = 'DELETE'
-  const url = `/p?_sessionlong=${name}`
+  const url = `/p/?_sessionlong=${name}`
   const response = await requestVtecx(method, url, req)
   console.log(`[vtecxnext deleteSessionLong] response. status=${response.status}`)
   // vte.cxからのset-cookieを転記
@@ -769,7 +769,7 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
   checkNotNull(name, 'Name')
   // vte.cxへリクエスト
   const method = 'GET'
-  const url = `/p?_sessionfeed=${name}`
+  const url = `/p/?_sessionfeed=${name}`
   const response = await requestVtecx(method, url, req)
   console.log(`[vtecxnext getSessionFeed] response. status=${response.status}`)
   // vte.cxからのset-cookieを転記
@@ -793,7 +793,7 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
   checkNotNull(name, 'Name')
   // vte.cxへリクエスト
   const method = 'GET'
-  const url = `/p?_sessionentry=${name}`
+  const url = `/p/?_sessionentry=${name}`
   const response = await requestVtecx(method, url, req)
   console.log(`[vtecxnext getSessionEntry] response. status=${response.status}`)
   // vte.cxからのset-cookieを転記
@@ -817,7 +817,7 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
   checkNotNull(name, 'Name')
   // vte.cxへリクエスト
   const method = 'GET'
-  const url = `/p?_sessionstring=${name}`
+  const url = `/p/?_sessionstring=${name}`
   const response = await requestVtecx(method, url, req)
   console.log(`[vtecxnext getSessionString] response. status=${response.status}`)
   // vte.cxからのset-cookieを転記
@@ -826,7 +826,11 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
   await checkVtecxResponse(response)
   // 戻り値
   const data = await getJson(response)
-  return data.feed.title
+  if (data) {
+    return data.feed.title
+  } else {
+    return null
+  }
 }
 
 /**
@@ -842,7 +846,7 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
   checkNotNull(name, 'Name')
   // vte.cxへリクエスト
   const method = 'GET'
-  const url = `/p?_sessionlong=${name}`
+  const url = `/p/?_sessionlong=${name}`
   const response = await requestVtecx(method, url, req)
   console.log(`[vtecxnext getSessionLong] response. status=${response.status}`)
   // vte.cxからのset-cookieを転記
@@ -851,7 +855,11 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
   await checkVtecxResponse(response)
   // 戻り値
   const data = await getJson(response)
-  return data.feed.title ? Number(data.feed.title) : null
+  if (data) {
+    return data.feed.title ? Number(data.feed.title) : null
+  } else {
+    return null
+  }
 }
 
 
