@@ -862,6 +862,122 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
   }
 }
 
+/**
+ * pagination
+ * @param req request
+ * @param res response
+ * @param uri key and conditions
+ * @param pagerange page range
+ * @return feed Maximum number of pages in the specified page range, and total count.
+ */
+ export const pagination = async (req:IncomingMessage, res:ServerResponse, uri:string, pagerange:string) => {
+  console.log('[vtecxnext pagination] start.')
+  // キー入力値チェック
+  checkUri(uri)
+  // vte.cxへリクエスト
+  const method = 'GET'
+  const url = `/p${uri}${uri.includes('?') ? '&' : '?'}_pagination=${pagerange}`
+  const response = await requestVtecx(method, url, req)
+  console.log(`[vtecxnext pagination] response=${response}`)
+  // vte.cxからのset-cookieを転記
+  setCookie(response, res)
+  // レスポンスのエラーチェック
+  await checkVtecxResponse(response)
+  // 戻り値
+  return await getJson(response)
+}
+
+/**
+ * get page
+ * @param req request
+ * @param res response
+ * @param uri key and conditions
+ * @param num page number
+ * @return feed Maximum number of pages in the specified page range, and total count.
+ */
+ export const getPage = async (req:IncomingMessage, res:ServerResponse, uri:string, num:number) => {
+  console.log('[vtecxnext getPage] start.')
+  // 入力値チェック
+  checkUri(uri)
+  checkNotNull(num, 'page number')
+  // vte.cxへリクエスト
+  const method = 'GET'
+  const url = `/p${uri}${uri.includes('?') ? '&' : '?'}n=${num}`
+  const response = await requestVtecx(method, url, req)
+  console.log(`[vtecxnext getPage] response=${response}`)
+  // vte.cxからのset-cookieを転記
+  setCookie(response, res)
+  // レスポンスのエラーチェック
+  await checkVtecxResponse(response)
+  // 戻り値
+  return await getJson(response)
+}
+
+/**
+ * post data to bigquery
+ * @param req request
+ * @param res response
+ * @param feed entries (JSON)
+ * @param async execute async
+ * @param tablenames key:entity's prop name, value:BigQuery table name
+ * @return true if successful
+ */
+ export const postBQ = async (req:IncomingMessage, res:ServerResponse, feed:any, async?:boolean, tablenames?:any) => {
+  console.log(`[vtecxnext postBQ] start. feed=${feed}`)
+  // 入力チェック
+  checkNotNull(feed, 'Feed')
+  // テーブル名の指定がある場合は指定
+  const tablenamesStr = editBqTableNames(tablenames)
+  if (tablenamesStr) {
+    feed.title = tablenamesStr
+  }
+  // vte.cxへリクエスト
+  const method = 'POST'
+  const url = `/p/?_bq${async ? '&' + String(async) : ''}`
+  const response = await requestVtecx(method, url, req, JSON.stringify(feed))
+  console.log(`[vtecxnext postBQ] response. status=${response.status}`)
+  // vte.cxからのset-cookieを転記
+  setCookie(response, res)
+  // レスポンスのエラーチェック
+  await checkVtecxResponse(response)
+  return true
+}
+
+/**
+ * delete data from bigquery
+ * @param req request
+ * @param res response
+ * @param keys delete keys
+ * @param async execute async
+ * @param tablenames key:entity's prop name, value:BigQuery table name
+ * @return true if successful
+ */
+ export const deleteBQ = async (req:IncomingMessage, res:ServerResponse, keys:string[], async?:boolean, tablenames?:any) => {
+  console.log(`[vtecxnext deleteBQ] start. keys=${keys}`)
+  // 入力チェック
+  checkNotNull(keys, 'Key')
+  // テーブル名の指定がある場合は指定
+  const tablenamesStr = editBqTableNames(tablenames)
+  // キーを feed.link.___href にセットする
+  let links = []
+  let idx = 0
+  for (let key of keys) {
+    console.log(`[vtecxnext deleteBQ] key=${key}`)
+    links[idx] = {'___href' : key}
+  }
+  const feed = tablenamesStr ? {'feed': {'link' : links, 'title' : tablenamesStr}} : {'feed': {'link' : links}}
+  // vte.cxへリクエスト
+  const method = 'DELETE'
+  const url = `/p/?_bq${async ? '&' + String(async) : ''}`
+  const response = await requestVtecx(method, url, req, JSON.stringify(feed))
+  console.log(`[vtecxnext deleteBQ] response. status=${response.status}`)
+  // vte.cxからのset-cookieを転記
+  setCookie(response, res)
+  // レスポンスのエラーチェック
+  await checkVtecxResponse(response)
+  return true
+}
+
 
 
 //---------------------------------------------
@@ -997,4 +1113,22 @@ const getJson = async (response:Response) => {
     }
     return null
   }
+}
+
+/**
+ * BigQuery登録・削除時のテーブル名指定文字列を編集
+ * @param tablenames テーブル名(キー:entry第一階層名、値:テーブル名)
+ * @returns BigQuery登録・削除時のテーブル名指定文字列 ({スキーマ第一階層名}:{テーブル名}, ...)
+ */
+const editBqTableNames = (tablenames:any) => {
+  if (!tablenames) {
+    return null
+  }
+  let result = ''
+  for (let [key, value] of tablenames) {
+    console.log(`[editBqTableNames] ${key}=${value}`)
+    result = `${result ? result + ',' : ''}${key}:${value}` 
+  }
+  console.log(`[editBqTableNames] result=${result}`)
+  return result
 }

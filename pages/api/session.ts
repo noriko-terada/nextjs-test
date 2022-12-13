@@ -22,7 +22,6 @@ const handler = async (req:NextApiRequest, res:NextApiResponse) => {
   try {
     if (method === 'GET') {
       if (type === 'feed') {
-        console.log(`[session] method=${method} name=${name} type=${type}`)
         resJson = await vtecxnext.getSessionFeed(req, res, name)
         resStatus = resJson ? 200 : 204
       } else if (type == 'entry') {

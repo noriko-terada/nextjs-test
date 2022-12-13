@@ -1,6 +1,8 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import * as vtecxnext from 'utils/vtecxnext'
 import { VtecxNextError } from 'utils/vtecxnext'
+import * as testutil from 'utils/testutil'
+import { ApiRouteTestError } from 'utils/testutil'
 
 const handler = async (req:NextApiRequest, res:NextApiResponse) => {
   console.log(`[getfeed] start. x-requested-with=${req.headers['x-requested-with']}`)
@@ -13,13 +15,12 @@ const handler = async (req:NextApiRequest, res:NextApiResponse) => {
   let param = ''
   for (const tmpkey in req.query) {
     if (tmpkey === 'uri') {
-      uri = `${req.query[tmpkey]}`
+      uri = testutil.toString(req.query[tmpkey])
     } else {
       param = `${param}${param ? '&' : '?'}${tmpkey}=${req.query[tmpkey]}`
     }
   }
-  console.log(`[getfeed] uri=${uri}`)
-  console.log(`[getfeed] param=${param}`)
+  console.log(`[getfeed] uri=${uri} param=${param}`)
 
   // フィード取得
   let resStatus:number

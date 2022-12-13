@@ -143,6 +143,26 @@ const HomePage = (props:Props) => {
       value: 'session_delete_long',
     },
     {
+      label: 'pagination (URLパラメータ:uri={キー}[&検索条件]&_pagination={ページ範囲})',
+      value: 'paging_pagination',
+    },
+    {
+      label: 'get page (URLパラメータ:uri={キー}[&検索条件]&n={ページ番号})',
+      value: 'paging_getpage',
+    },
+    {
+      label: 'post bigquery (リクエストデータ、URLパラメータ:[_async])',
+      value: 'bigquery_post',
+    },
+    {
+      label: 'delete bigquery (リクエストデータ、URLパラメータ:[_async])',
+      value: 'bigquery_delete',
+    },
+    {
+      label: 'select bigquery (リクエストデータ、URLパラメータ:[_csv])',
+      value: 'bigquery_select',
+    },
+    {
       label: 'logout (/d)',
       value: 'logout',
     },
@@ -219,6 +239,9 @@ const HomePage = (props:Props) => {
           body = reqdata
         }
       }
+    } else if (action.startsWith('paging_')) {
+      method = 'GET'
+      apiAction = 'paging'
     }
 
     if (method != null && apiAction != null) {

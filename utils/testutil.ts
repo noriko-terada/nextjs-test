@@ -2,6 +2,12 @@ import { NextApiRequest, NextApiResponse } from 'next'
 import * as vtecxnext from 'utils/vtecxnext'
 import { VtecxNextError } from 'utils/vtecxnext'
 
+type getRequestJson = (req:NextApiRequest) => any
+type getParam = (req:NextApiRequest, name:string) => string
+type toString = (tmpVal:any) => string
+type getParamNumber = (req:NextApiRequest, name:string) => number
+type toNumber = (tmpVal:any) => number
+
 /**
  * リクエストデータを取得.
  * エラー発生時、ステータス400のApiRouteTestErrorをスローする。
@@ -33,6 +39,15 @@ import { VtecxNextError } from 'utils/vtecxnext'
  */
  export const getParam = (req:NextApiRequest, name:string) => {
   const tmpVal = req.query[name]
+  return toString(tmpVal)
+}
+
+/**
+ * 値をstring型で返す.
+ * @param tmpVal 値
+ * @return stringの値
+ */
+ export const toString = (tmpVal:any) => {
   return tmpVal ? String(tmpVal) : ''
 }
 
@@ -44,12 +59,23 @@ import { VtecxNextError } from 'utils/vtecxnext'
  */
  export const getParamNumber = (req:NextApiRequest, name:string) => {
   const tmpVal = req.query[name]
+  return toNumber(tmpVal)
+}
+
+/**
+ * 値をnumber型で返す.
+ * @param tmpVal 値
+ * @return numberの値
+ */
+ export const toNumber = (tmpVal:any) => {
   if (tmpVal) {
     return Number(tmpVal)
   } else {
-    throw new ApiRouteTestError(400, `Not numeric. name=${name} value=${tmpVal}`)
+    throw new ApiRouteTestError(400, `Not numeric. ${tmpVal}`)
   }
 }
+
+
 
 
 
