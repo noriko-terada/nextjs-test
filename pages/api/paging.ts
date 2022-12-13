@@ -21,7 +21,7 @@ const handler = async (req:NextApiRequest, res:NextApiResponse) => {
     } else if (tmpkey === '_pagination') {
       pagerange = testutil.toString(req.query[tmpkey])
     } else if (tmpkey === 'n') {
-      num = testutil.toNumber(req.query[tmpkey], 'num')
+      num = testutil.toNumber(req.query[tmpkey])
     } else {
       param = `${param}${param ? '&' : '?'}${tmpkey}=${req.query[tmpkey]}`
     }
