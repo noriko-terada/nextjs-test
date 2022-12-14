@@ -63,19 +63,64 @@ type toNumber = (tmpVal:any) => number
 }
 
 /**
- * 値をnumber型で返す.
+ * 値をnumber型で返す.空はエラー.
  * @param tmpVal 値
  * @return numberの値
  */
  export const toNumber = (tmpVal:any) => {
+  let errMsg = `Not numeric. ${tmpVal}`
   if (tmpVal) {
-    return Number(tmpVal)
-  } else {
-    throw new ApiRouteTestError(400, `Not numeric. ${tmpVal}`)
+    try {
+      return Number(tmpVal)
+    } catch (e) {
+      if (e instanceof Error) {
+        errMsg = e.message
+      }
+    }
   }
+  throw new ApiRouteTestError(400, errMsg)
 }
 
+/**
+ * 値をboolean型で返す.空はエラー.
+ * @param tmpVal 値
+ * @return booleanの値
+ */
+ export const toBoolean = (tmpVal:any) => {
+  let errMsg = `Not boolean. ${tmpVal}`
+  if (tmpVal) {
+    try {
+      return Boolean(tmpVal)
+    } catch (e) {
+      if (e instanceof Error) {
+        errMsg = e.message
+      }
+    }
+  }
+  throw new ApiRouteTestError(400, errMsg)
+}
 
+/**
+ * BigQueryでテーブル名指定の場合の型変換を行う.
+ * @param tablenamesStr 値
+ * @return テーブル名リスト
+ */
+ export const getBqTablenames = (tablenamesStr:string) => {
+  if (!tablenamesStr) {
+    return null
+  }
+  const tablenames:any = {}
+  const tmp = tablenamesStr.split(',')
+  for (const tablenameInfo of tmp) {
+    const idx = tablenameInfo.indexOf(':')
+    if (idx < 1) {
+      throw new ApiRouteTestError(400, `Invalid tablenames of BigQuery. ${tablenamesStr}`)
+    }
+    const entityName:string = tablenameInfo.substring(idx)
+    tablenames[entityName] = tablenameInfo.substring(idx + 1)
+  }
+  return tablenames
+}
 
 
 

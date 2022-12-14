@@ -151,16 +151,16 @@ const HomePage = (props:Props) => {
       value: 'paging_getpage',
     },
     {
-      label: 'post bigquery (リクエストデータ、URLパラメータ:[_async])',
+      label: 'post bigquery (リクエストデータ、URLパラメータ:[_async&tablenames={エンティティの第一階層名}:{テーブル名},...])',
       value: 'bigquery_post',
     },
     {
-      label: 'delete bigquery (リクエストデータ、URLパラメータ:[_async])',
+      label: 'delete bigquery (URLパラメータ:uri={キー[,キー,...]}[&_async&tablenames={エンティティの第一階層名}:{テーブル名},...])',
       value: 'bigquery_delete',
     },
     {
-      label: 'select bigquery (リクエストデータ、URLパラメータ:[_csv])',
-      value: 'bigquery_select',
+      label: 'select bigquery (リクエストデータ(feed.titleにSQL)、URLパラメータ:[_csv])',
+      value: 'bigquery_put',
     },
     {
       label: 'logout (/d)',
@@ -177,7 +177,7 @@ const HomePage = (props:Props) => {
    * @returns レスポンスJSON
    */
   const request = async (method:string, apiAction:string, body?:any, additionalParam?:string) => {
-    console.log('[request] start.')
+    console.log(`[request] start. apiAction=${apiAction} method=${method}`)
     const requestInit:RequestInit = {
       body: body,
       method: method,
@@ -186,7 +186,9 @@ const HomePage = (props:Props) => {
       }
     }
   
-    const response = await fetch(`api/${apiAction}?${urlparam}${urlparam ? '&' : ''}${additionalParam}`, requestInit)
+    const url = `api/${apiAction}?${urlparam ? urlparam + '&' : ''}${additionalParam ? additionalParam : ''}`
+    console.log(`[request] url=${url}`)
+    const response = await fetch(url, requestInit)
 
     console.log(`[request] response. ${response}`)
     const status = response.status
@@ -208,6 +210,7 @@ const HomePage = (props:Props) => {
     let body
     let apiAction
     let additionalParam
+    let isJson:boolean = true
     if (action === 'uid' || action === 'uid2' || action === 'whoami' || 
         action === 'isloggedin' || action === 'logout' || 
         action === 'getentry' || action === 'getfeed' || action === 'getcount' ||
@@ -242,13 +245,28 @@ const HomePage = (props:Props) => {
     } else if (action.startsWith('paging_')) {
       method = 'GET'
       apiAction = 'paging'
-    }
+    } else if (action.startsWith('bigquery_')) {
+      method = action.substring(9)
+      apiAction = 'bigquery'
+      if (method === 'post' || method === 'put') {
+        body = reqdata
+      }
+      if (method === 'put') {
+        isJson = false
+      }
+  }
 
     if (method != null && apiAction != null) {
       const data = await request(method, apiAction, body, additionalParam)
-      const feedStr = JSON.stringify(data)
-      console.log(`[doRequest] data=${feedStr}`)
-      setResult(feedStr)
+      if (isJson) {
+        const feedStr = JSON.stringify(data)
+        console.log(`[doRequest] data=${feedStr}`)
+        setResult(feedStr)
+      } else {
+        // TODO データダウンロード
+        console.log(`[doRequest] isJson=false data=${data}`)
+
+      }
 
     } else {
       setResult(`no action: ${action}`)

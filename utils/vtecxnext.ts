@@ -965,7 +965,13 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
     console.log(`[vtecxnext deleteBQ] key=${key}`)
     links[idx] = {'___href' : key}
   }
-  const feed = tablenamesStr ? {'feed': {'link' : links, 'title' : tablenamesStr}} : {'feed': {'link' : links}}
+  //const feed = tablenamesStr ? {'feed': {'link' : links, 'title' : tablenamesStr}} : {'feed': {'link' : links}}
+  const feed:any = {'feed': {}}
+  if (tablenamesStr) {
+    feed.feed['title'] = tablenamesStr
+  }
+  feed.feed['link'] = links
+  console.log(`[vtecxnext deleteBQ] feed=${feed}`)
   // vte.cxへリクエスト
   const method = 'DELETE'
   const url = `/p/?_bq${async ? '&' + String(async) : ''}`
@@ -976,6 +982,49 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
   // レスポンスのエラーチェック
   await checkVtecxResponse(response)
   return true
+}
+
+/**
+ * query bigquery
+ * @param req request
+ * @param res response
+ * @param sql query sql
+ * @param parent parent name of result json
+ * @param csv true for CSV output
+ * @return 
+ */
+ export const queryBQ = async (req:IncomingMessage, res:ServerResponse, sql:string, parent?:string, csv?:boolean) => {
+  console.log(`[vtecxnext queryBQ] start. sql=${sql}`)
+  // 入力チェック
+  checkNotNull(sql, 'Query SQL')
+  // 引数
+  const feed:any = {'feed' : {'title' : sql}}
+  if (parent) {
+    feed.feed['subtitle'] = parent
+  }
+  console.log(`[vtecxnext queryBQ] feed=${feed}`)
+  // vte.cxへリクエスト
+  const method = 'PUT'
+  const url = `/p/?_querybq${csv ? '&_csv' : ''}`
+  const response = await requestVtecx(method, url, req, JSON.stringify(feed))
+  console.log(`[vtecxnext queryBQ] response. status=${response.status}`)
+  // vte.cxからのset-cookieを転記
+  setCookie(response, res)
+  console.log(`[vtecxnext queryBQ] setCookie end.`)
+  // レスポンスのエラーチェック
+  await checkVtecxResponse(response)
+  console.log(`[vtecxnext queryBQ] checkVtecxResponse end.`)
+  // レスポンス出力
+  setResponseHeaders(response, res)
+  console.log(`[vtecxnext queryBQ] setResponseHeaders end.`)
+  // 戻り値
+  //return await response.blob()
+  const resData = await response.blob()
+  console.log(`[vtecxnext queryBQ] await response.blob end. resData=${resData}`)
+  //res.send(resData)
+  //res.write(resData.arrayBuffer())
+  //console.log(`[vtecxnext queryBQ] res.write end.`)
+  return resData
 }
 
 
@@ -1042,6 +1091,20 @@ const setCookie = (response:Response, res:ServerResponse) => {
   const setCookieVal = response.headers.get('set-cookie')
   if (setCookieVal === '' || setCookieVal) {
     res.setHeader('set-cookie', setCookieVal)
+  }
+}
+
+/**
+ * vte.cxからのレスポンスヘッダを、ブラウザへレスポンスする。
+ * コンテンツの戻し時に使用。
+ * @param response vte.cxからのレスポンス
+ * @param res ブラウザへのレスポンス
+ */
+const setResponseHeaders = (response:Response, res:ServerResponse) => {
+  for (const name in response.headers) {
+    let val = response.headers.get(name)
+    val = val ? val : ''
+    res.setHeader(name, val)
   }
 }
 
