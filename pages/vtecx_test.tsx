@@ -63,7 +63,7 @@ const HomePage = (props:Props) => {
       value: 'deleteentry',
     },
     {
-      label: 'delete folder (URLパラメータ:uri={親キー})',
+      label: 'delete folder (URLパラメータ:uri={親キー}[&_async])',
       value: 'deletefolder',
     },
     {
@@ -159,7 +159,7 @@ const HomePage = (props:Props) => {
       value: 'bigquery_delete',
     },
     {
-      label: 'select bigquery (リクエストデータ(feed.titleにSQL)、URLパラメータ:[_csv])',
+      label: 'select bigquery (リクエストデータ(feed.titleにSQL、[feed.subtitleにCSVヘッダ])、URLパラメータ:[_csv])',
       value: 'bigquery_put',
     },
     {
@@ -189,14 +189,19 @@ const HomePage = (props:Props) => {
     const url = `api/${apiAction}?${urlparam ? urlparam + '&' : ''}${additionalParam ? additionalParam : ''}`
     console.log(`[request] url=${url}`)
     const response = await fetch(url, requestInit)
-
-    console.log(`[request] response. ${response}`)
     const status = response.status
+    console.log(`[request] response. status=${status}`)
     let data
     if (status === 204) {
       data = null
     } else {
-      data = await response.json()
+      const contentType = response.headers.get('content-type')
+      console.log(`[request] content-type=${contentType}`)
+      if (!contentType || contentType.startsWith('application/json')) {
+        data = await response.json()
+      } else {
+        data = await response.blob()
+      }
     }
     console.log(data)
     return data
@@ -251,7 +256,7 @@ const HomePage = (props:Props) => {
       if (method === 'post' || method === 'put') {
         body = reqdata
       }
-      if (method === 'put') {
+      if (method === 'put' && urlparam.indexOf('_csv') > -1) {
         isJson = false
       }
   }
@@ -266,6 +271,13 @@ const HomePage = (props:Props) => {
         // TODO データダウンロード
         console.log(`[doRequest] isJson=false data=${data}`)
 
+        const anchor = document.createElement("a");
+        anchor.href = URL.createObjectURL(data)
+        anchor.download = "test_vtecxnext.csv";
+        document.body.appendChild(anchor);
+        anchor.click();
+        URL.revokeObjectURL(anchor.href);
+        document.body.removeChild(anchor);
       }
 
     } else {

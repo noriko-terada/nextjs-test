@@ -43,6 +43,18 @@ type toNumber = (tmpVal:any) => number
 }
 
 /**
+ * URLパラメータを取得し、string型で返す.
+ * @param req リクエスト
+ * @param name パラメータ名
+ * @return パラメータ値
+ */
+ export const hasParam = (req:NextApiRequest, name:string) => {
+  const tmpVal = req.query[name]
+  console.log(`[hasParam] ${name}=${tmpVal}`)
+  return tmpVal == undefined ? false : true
+}
+
+/**
  * 値をstring型で返す.
  * @param tmpVal 値
  * @return stringの値
@@ -116,9 +128,10 @@ type toNumber = (tmpVal:any) => number
     if (idx < 1) {
       throw new ApiRouteTestError(400, `Invalid tablenames of BigQuery. ${tablenamesStr}`)
     }
-    const entityName:string = tablenameInfo.substring(idx)
+    const entityName:string = tablenameInfo.substring(0, idx)
     tablenames[entityName] = tablenameInfo.substring(idx + 1)
   }
+  console.log(`[getBqTablenames] tablenames = ${JSON.stringify(tablenames)}`)
   return tablenames
 }
 

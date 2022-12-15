@@ -40,6 +40,11 @@ type getSessionFeed = (req:IncomingMessage, res:ServerResponse, name:string) => 
 type getSessionEntry = (req:IncomingMessage, res:ServerResponse, name:string) => Promise<any>
 type getSessionString = (req:IncomingMessage, res:ServerResponse, name:string) => Promise<string>
 type getSessionLong = (req:IncomingMessage, res:ServerResponse, name:string) => Promise<number>
+type pagination = (req:IncomingMessage, res:ServerResponse, uri:string, pagerange:string) => Promise<any>
+type getPage = (req:IncomingMessage, res:ServerResponse, uri:string, num:number) => Promise<any>
+type postBQ = (req:IncomingMessage, res:ServerResponse, feed:any, async?:boolean, tablenames?:any) => Promise<boolean>
+type deleteBQ = (req:IncomingMessage, res:ServerResponse, keys:string[], async?:boolean, tablenames?:any) => Promise<boolean>
+type queryBQ = (req:IncomingMessage, res:ServerResponse, sql:string, parent?:string, csv?:boolean) => Promise<Blob | any>
 
 /**
  * X-Requested-With header check.
@@ -141,8 +146,8 @@ type getSessionLong = (req:IncomingMessage, res:ServerResponse, name:string) => 
 
 /**
  * get login whoami
- * @param req request
- * @param res response
+ * @param req request (for authentication)
+ * @param res response (for authentication)
  * @return login user information
  */
  export const whoami = async (req:IncomingMessage, res:ServerResponse) => {
@@ -162,8 +167,8 @@ type getSessionLong = (req:IncomingMessage, res:ServerResponse, name:string) => 
 
 /**
  * whether you are logged in
- * @param req request
- * @param res response
+ * @param req request (for authentication)
+ * @param res response (for authentication)
  * @return true if logged in
  */
  export const isLoggedin = async (req:IncomingMessage, res:ServerResponse) => {
@@ -178,8 +183,8 @@ type getSessionLong = (req:IncomingMessage, res:ServerResponse, name:string) => 
 
 /**
  * register a log entry
- * @param req request
- * @param res response
+ * @param req request (for authentication)
+ * @param res response (for authentication)
  * @param message message
  * @param title title
  * @param subtitle subtitle
@@ -205,8 +210,8 @@ type getSessionLong = (req:IncomingMessage, res:ServerResponse, name:string) => 
 
 /**
  * get entry
- * @param req request
- * @param res response
+ * @param req request (for authentication)
+ * @param res response (for authentication)
  * @param uri key
  * @return entry
  */
@@ -229,8 +234,8 @@ type getSessionLong = (req:IncomingMessage, res:ServerResponse, name:string) => 
 
 /**
  * get entry
- * @param req request
- * @param res response
+ * @param req request (for authentication)
+ * @param res response (for authentication)
  * @param uri key and conditions
  * @return feed (entry array)
  */
@@ -253,8 +258,8 @@ type getSessionLong = (req:IncomingMessage, res:ServerResponse, name:string) => 
 
 /**
  * get count
- * @param req request
- * @param res response
+ * @param req request (for authentication)
+ * @param res response (for authentication)
  * @param uri key and conditions
  * @return count
  */
@@ -278,8 +283,8 @@ type getSessionLong = (req:IncomingMessage, res:ServerResponse, name:string) => 
 
 /**
  * register entries
- * @param req request
- * @param res response
+ * @param req request (for authentication)
+ * @param res response (for authentication)
  * @param feed entries (JSON)
  * @param uri parent key if not specified in entry
  * @return registed entries
@@ -306,8 +311,8 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
 
 /**
  * update entries
- * @param req request
- * @param res response
+ * @param req request (for authentication)
+ * @param res response (for authentication)
  * @param feed entries (JSON)
  * @return updated entries
  */
@@ -329,8 +334,8 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
 
 /**
  * delete entry
- * @param req request
- * @param res response
+ * @param req request (for authentication)
+ * @param res response (for authentication)
  * @param uri key
  * @param revision number of revision
  * @return true if successful
@@ -354,18 +359,19 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
 
 /**
  * delete folder
- * @param req request
- * @param res response
+ * @param req request (for authentication)
+ * @param res response (for authentication)
  * @param uri parent key
+ * @param async execute async
  * @return true if successful
  */
- export const deleteFolder = async (req:IncomingMessage, res:ServerResponse, uri:string) => {
-  console.log(`[vtecxnext deleteFolder] start. uri=${uri}`)
+ export const deleteFolder = async (req:IncomingMessage, res:ServerResponse, uri:string, async?:boolean) => {
+  console.log(`[vtecxnext deleteFolder] start. uri=${uri} async=${async}`)
   // キー入力値チェック
   checkUri(uri)
   // vte.cxへリクエスト
   const method = 'DELETE'
-  const url = `/p${uri}?_rf`
+  const url = `/p${uri}?_rf${async ? '&_async' : ''}`
   const response = await requestVtecx(method, url, req)
   console.log(`[vtecxnext deleteFolder] response. status=${response.status}`)
   // vte.cxからのset-cookieを転記
@@ -377,8 +383,8 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
 
 /**
  * allocate numbers
- * @param req request
- * @param res response
+ * @param req request (for authentication)
+ * @param res response (for authentication)
  * @param uri key
  * @param num number to allocate
  * @return allocated numbers. comma separated if multiple.
@@ -404,8 +410,8 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
 
 /**
  * add a number
- * @param req request
- * @param res response
+ * @param req request (for authentication)
+ * @param res response (for authentication)
  * @param uri key
  * @param num number to add
  * @return added number
@@ -431,8 +437,8 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
 
 /**
  * get a added number
- * @param req request
- * @param res response
+ * @param req request (for authentication)
+ * @param res response (for authentication)
  * @param uri key
  * @return added number
  */
@@ -456,8 +462,8 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
 
 /**
  * set a number
- * @param req request
- * @param res response
+ * @param req request (for authentication)
+ * @param res response (for authentication)
  * @param uri key
  * @param num number to set
  * @return set number
@@ -483,8 +489,8 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
 
 /**
  * set a addition range
- * @param req request
- * @param res response
+ * @param req request (for authentication)
+ * @param res response (for authentication)
  * @param uri key
  * @param range addition range
  * @return addition range
@@ -511,8 +517,8 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
 
 /**
  * get a addition range
- * @param req request
- * @param res response
+ * @param req request (for authentication)
+ * @param res response (for authentication)
  * @param uri key
  * @return addition range
  */
@@ -536,8 +542,8 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
 
 /**
  * set feed to session
- * @param req request
- * @param res response
+ * @param req request (for authentication)
+ * @param res response (for authentication)
  * @param name name
  * @param feed entries (JSON)
  * @return true if successful
@@ -561,8 +567,8 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
 
 /**
  * set entry to session
- * @param req request
- * @param res response
+ * @param req request (for authentication)
+ * @param res response (for authentication)
  * @param name name
  * @param entry entry (JSON)
  * @return true if successful
@@ -587,8 +593,8 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
 
 /**
  * set string to session
- * @param req request
- * @param res response
+ * @param req request (for authentication)
+ * @param res response (for authentication)
  * @param name name
  * @param str string
  * @return true if successful
@@ -613,8 +619,8 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
 
 /**
  * set number to session
- * @param req request
- * @param res response
+ * @param req request (for authentication)
+ * @param res response (for authentication)
  * @param name name
  * @param num number
  * @return true if successful
@@ -639,8 +645,8 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
 
 /**
  * add number in session
- * @param req request
- * @param res response
+ * @param req request (for authentication)
+ * @param res response (for authentication)
  * @param name name
  * @param num number to add
  * @return true if successful
@@ -666,8 +672,8 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
 
 /**
  * delete feed from session
- * @param req request
- * @param res response
+ * @param req request (for authentication)
+ * @param res response (for authentication)
  * @param name name
  * @return true if successful
  */
@@ -689,8 +695,8 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
 
 /**
  * delete entry from session
- * @param req request
- * @param res response
+ * @param req request (for authentication)
+ * @param res response (for authentication)
  * @param name name
  * @return true if successful
  */
@@ -712,8 +718,8 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
 
 /**
  * delete string from session
- * @param req request
- * @param res response
+ * @param req request (for authentication)
+ * @param res response (for authentication)
  * @param name name
  * @return true if successful
  */
@@ -735,8 +741,8 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
 
 /**
  * delete number from session
- * @param req request
- * @param res response
+ * @param req request (for authentication)
+ * @param res response (for authentication)
  * @param name name
  * @return true if successful
  */
@@ -758,8 +764,8 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
 
 /**
  * get feed from session
- * @param req request
- * @param res response
+ * @param req request (for authentication)
+ * @param res response (for authentication)
  * @param name name
  * @return feed
  */
@@ -782,8 +788,8 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
 
 /**
  * get entry from session
- * @param req request
- * @param res response
+ * @param req request (for authentication)
+ * @param res response (for authentication)
  * @param name name
  * @return entry
  */
@@ -806,8 +812,8 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
 
 /**
  * get string from session
- * @param req request
- * @param res response
+ * @param req request (for authentication)
+ * @param res response (for authentication)
  * @param name name
  * @return string
  */
@@ -835,8 +841,8 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
 
 /**
  * get number from session
- * @param req request
- * @param res response
+ * @param req request (for authentication)
+ * @param res response (for authentication)
  * @param name name
  * @return number
  */
@@ -864,8 +870,8 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
 
 /**
  * pagination
- * @param req request
- * @param res response
+ * @param req request (for authentication)
+ * @param res response (for authentication)
  * @param uri key and conditions
  * @param pagerange page range
  * @return feed Maximum number of pages in the specified page range, and total count.
@@ -889,8 +895,8 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
 
 /**
  * get page
- * @param req request
- * @param res response
+ * @param req request (for authentication)
+ * @param res response (for authentication)
  * @param uri key and conditions
  * @param num page number
  * @return feed Maximum number of pages in the specified page range, and total count.
@@ -915,26 +921,28 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
 
 /**
  * post data to bigquery
- * @param req request
- * @param res response
+ * @param req request (for authentication)
+ * @param res response (for authentication)
  * @param feed entries (JSON)
  * @param async execute async
  * @param tablenames key:entity's prop name, value:BigQuery table name
  * @return true if successful
  */
  export const postBQ = async (req:IncomingMessage, res:ServerResponse, feed:any, async?:boolean, tablenames?:any) => {
-  console.log(`[vtecxnext postBQ] start. feed=${feed}`)
+  console.log(`[vtecxnext postBQ] start. async=${async} feed=${feed}`)
   // 入力チェック
   checkNotNull(feed, 'Feed')
+  // リクエストデータ
+  const reqFeed = 'feed' in feed ? feed : {'feed' : {'entry' : feed}}
   // テーブル名の指定がある場合は指定
   const tablenamesStr = editBqTableNames(tablenames)
   if (tablenamesStr) {
-    feed.title = tablenamesStr
+    reqFeed.feed['title'] = tablenamesStr
   }
   // vte.cxへリクエスト
   const method = 'POST'
-  const url = `/p/?_bq${async ? '&' + String(async) : ''}`
-  const response = await requestVtecx(method, url, req, JSON.stringify(feed))
+  const url = `/p/?_bq${async ? '&_async' : ''}`
+  const response = await requestVtecx(method, url, req, JSON.stringify(reqFeed))
   console.log(`[vtecxnext postBQ] response. status=${response.status}`)
   // vte.cxからのset-cookieを転記
   setCookie(response, res)
@@ -945,27 +953,27 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
 
 /**
  * delete data from bigquery
- * @param req request
- * @param res response
+ * @param req request (for authentication)
+ * @param res response (for authentication)
  * @param keys delete keys
  * @param async execute async
  * @param tablenames key:entity's prop name, value:BigQuery table name
  * @return true if successful
  */
  export const deleteBQ = async (req:IncomingMessage, res:ServerResponse, keys:string[], async?:boolean, tablenames?:any) => {
-  console.log(`[vtecxnext deleteBQ] start. keys=${keys}`)
+  console.log(`[vtecxnext deleteBQ] start. async=${async} keys=${keys}`)
   // 入力チェック
   checkNotNull(keys, 'Key')
   // テーブル名の指定がある場合は指定
   const tablenamesStr = editBqTableNames(tablenames)
   // キーを feed.link.___href にセットする
-  let links = []
+  const links = []
   let idx = 0
-  for (let key of keys) {
+  for (const key of keys) {
     console.log(`[vtecxnext deleteBQ] key=${key}`)
     links[idx] = {'___href' : key}
+    idx++
   }
-  //const feed = tablenamesStr ? {'feed': {'link' : links, 'title' : tablenamesStr}} : {'feed': {'link' : links}}
   const feed:any = {'feed': {}}
   if (tablenamesStr) {
     feed.feed['title'] = tablenamesStr
@@ -974,7 +982,7 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
   console.log(`[vtecxnext deleteBQ] feed=${feed}`)
   // vte.cxへリクエスト
   const method = 'DELETE'
-  const url = `/p/?_bq${async ? '&' + String(async) : ''}`
+  const url = `/p/?_bq${async ? '&_async' : ''}`
   const response = await requestVtecx(method, url, req, JSON.stringify(feed))
   console.log(`[vtecxnext deleteBQ] response. status=${response.status}`)
   // vte.cxからのset-cookieを転記
@@ -986,15 +994,15 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
 
 /**
  * query bigquery
- * @param req request
- * @param res response
+ * @param req request (for authentication)
+ * @param res response (for authentication)
  * @param sql query sql
  * @param parent parent name of result json
  * @param csv true for CSV output
- * @return 
+ * @return blob if csv is true, json otherwise
  */
  export const queryBQ = async (req:IncomingMessage, res:ServerResponse, sql:string, parent?:string, csv?:boolean) => {
-  console.log(`[vtecxnext queryBQ] start. sql=${sql}`)
+  console.log(`[vtecxnext queryBQ] start. sql=${sql} csv=${csv}`)
   // 入力チェック
   checkNotNull(sql, 'Query SQL')
   // 引数
@@ -1014,17 +1022,12 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
   // レスポンスのエラーチェック
   await checkVtecxResponse(response)
   console.log(`[vtecxnext queryBQ] checkVtecxResponse end.`)
-  // レスポンス出力
-  setResponseHeaders(response, res)
-  console.log(`[vtecxnext queryBQ] setResponseHeaders end.`)
   // 戻り値
-  //return await response.blob()
-  const resData = await response.blob()
-  console.log(`[vtecxnext queryBQ] await response.blob end. resData=${resData}`)
-  //res.send(resData)
-  //res.write(resData.arrayBuffer())
-  //console.log(`[vtecxnext queryBQ] res.write end.`)
-  return resData
+  if (csv) {
+    return await response.blob()
+  } else {
+    return await response.json()
+  }
 }
 
 
@@ -1101,10 +1104,16 @@ const setCookie = (response:Response, res:ServerResponse) => {
  * @param res ブラウザへのレスポンス
  */
 const setResponseHeaders = (response:Response, res:ServerResponse) => {
-  for (const name in response.headers) {
-    let val = response.headers.get(name)
-    val = val ? val : ''
-    res.setHeader(name, val)
+  const it = response.headers.entries()
+  let header:IteratorResult<[string, string], any> = it.next()
+  while (header && !header.done) {
+    const name = header.value[0]
+    if (name.startsWith('content-') || name.startsWith('x-')) {
+      const val = header.value[1]
+      console.log(`[setResponseHeaders] ${name} = ${val}`)
+      res.setHeader(name, val)
+    }
+    header = it.next()
   }
 }
 
@@ -1184,11 +1193,13 @@ const getJson = async (response:Response) => {
  * @returns BigQuery登録・削除時のテーブル名指定文字列 ({スキーマ第一階層名}:{テーブル名}, ...)
  */
 const editBqTableNames = (tablenames:any) => {
+  console.log(`[editBqTableNames] tablenames = ${tablenames}`)
   if (!tablenames) {
     return null
   }
   let result = ''
-  for (let [key, value] of tablenames) {
+  for (let key in tablenames) {
+    const value = tablenames[key]
     console.log(`[editBqTableNames] ${key}=${value}`)
     result = `${result ? result + ',' : ''}${key}:${value}` 
   }

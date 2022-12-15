@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import * as vtecxnext from 'utils/vtecxnext'
 import { VtecxNextError } from 'utils/vtecxnext'
+import * as testutil from 'utils/testutil'
 
 const handler = async (req:NextApiRequest, res:NextApiResponse) => {
   console.log(`[deletefolder] start. x-requested-with=${req.headers['x-requested-with']}`)
@@ -11,15 +12,16 @@ const handler = async (req:NextApiRequest, res:NextApiResponse) => {
   // キーを取得
   const tmpUri = req.query['uri']
   const uri:string = tmpUri ? String(tmpUri) : ''
-  console.log(`[deletefolder] uri=${uri}`)
+  const async:boolean = testutil.hasParam(req, '_async')
+  console.log(`[deletefolder] uri=${uri} async=${async}`)
 
   // 削除
   let resStatus:number
   let resMessage:string
   try {
-    await vtecxnext.deleteFolder(req, res, uri)
-    resStatus = 200
-    resMessage = `folder deleted. ${uri}`
+    await vtecxnext.deleteFolder(req, res, uri, async)
+    resStatus = async ? 202 : 200
+    resMessage = `folder deleted. ${async ? '(accepted)' : ''} ${uri}`
   } catch (error) {
     if (error instanceof VtecxNextError) {
       console.log(`[deletefolder] Error occured. status=${error.status} ${error.message}`)
