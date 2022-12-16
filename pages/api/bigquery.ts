@@ -21,6 +21,7 @@ const handler = async (req:NextApiRequest, res:NextApiResponse) => {
       // クエリ検索
       const feed = testutil.getRequestJson(req)
       const sql = feed.feed.title
+      const values:any[] = getValues(feed)
       const parent = feed.feed.subtitle
       const csv = testutil.hasParam(req, '_csv')
       console.log(`[bigquery] csv=${csv}`)
@@ -28,22 +29,21 @@ const handler = async (req:NextApiRequest, res:NextApiResponse) => {
       //console.log(`[bigquery] resData=${resData}`)
       //resStatus = resData ? 200 : 204
       //res.send(resData)  // test
-      const isCsv = csv ? true : false
-      const resData = await vtecxnext.queryBQ(req, res, sql, parent, isCsv)
-      if (resData) {
-        res.statusCode = 200
-        if (isCsv) {
-          res.setHeader('Content-Type', resData.type)
-          res.setHeader('Content-Disposition', 'attachment; filename="temp.csv"')
-          const csvData = await resData.arrayBuffer()
-          console.log('[bigquery] csv arrayBuffer')
-          res.end(csvData)
-        } else {
+      if (!csv) {
+        // 戻り値: JSON
+        const resData = await vtecxnext.getBQ(req, res, sql, values, parent)
+        if (resData) {
+          res.statusCode = 200
           res.json(resData)
+        } else {
+          res.statusCode = 204
+          res.end()
         }
       } else {
-        res.statusCode = 204
-        res.end()
+        // 戻り値: CSV
+        const csvname = testutil.getParam(req, '_csv')
+        const resData = await vtecxnext.getBQCsv(req, res, sql, values, csvname, parent)
+        res.statusCode = resData ? 200 : 204
       }
       console.log('[bigquery] queryBq end.')
 
@@ -96,3 +96,27 @@ const handler = async (req:NextApiRequest, res:NextApiResponse) => {
 }
 
 export default handler
+
+const getValues = (feed:any) => {
+  const values = []
+  let idx = 0
+  for (const category of feed.feed.category) {
+    const type = category.___term
+    const tmpVal = category.___label
+    let val
+    if (type) {
+      if (type.equals('int') || type.equals('float')) {
+        val = Number(tmpVal)
+      } else if (type.equals('bool')) {
+        val = Boolean(tmpVal)
+      } else {
+        val = String(tmpVal)
+      }
+    } else {
+      val = String(tmpVal)
+    }
+    values[idx] = val
+    idx++
+  }
+  return values
+}

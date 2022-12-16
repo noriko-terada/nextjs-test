@@ -1,5 +1,7 @@
 import { IncomingMessage, ServerResponse } from 'http'
 import * as nodeurl from 'url'
+//import { SqlString } from 'sqlstring'
+var SqlString = require('sqlstring')
 
 // 型定義
 // 認証のため各関数にリクエスト(IncomingMessage)が必要。
@@ -44,7 +46,8 @@ type pagination = (req:IncomingMessage, res:ServerResponse, uri:string, pagerang
 type getPage = (req:IncomingMessage, res:ServerResponse, uri:string, num:number) => Promise<any>
 type postBQ = (req:IncomingMessage, res:ServerResponse, feed:any, async?:boolean, tablenames?:any) => Promise<boolean>
 type deleteBQ = (req:IncomingMessage, res:ServerResponse, keys:string[], async?:boolean, tablenames?:any) => Promise<boolean>
-type queryBQ = (req:IncomingMessage, res:ServerResponse, sql:string, parent?:string, csv?:boolean) => Promise<Blob | any>
+type getBQ = (req:IncomingMessage, res:ServerResponse, sql:string, parent?:string) => Promise<any>
+type getBQCsv = (req:IncomingMessage, res:ServerResponse, sql:string, values?:any[], filename?:string, parent?:string) => Promise<boolean>
 
 /**
  * X-Requested-With header check.
@@ -997,37 +1000,64 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
  * @param req request (for authentication)
  * @param res response (for authentication)
  * @param sql query sql
+ * @param values values of query arguments
  * @param parent parent name of result json
- * @param csv true for CSV output
- * @return blob if csv is true, json otherwise
+ * @return query results in JSON format
  */
- export const queryBQ = async (req:IncomingMessage, res:ServerResponse, sql:string, parent?:string, csv?:boolean) => {
-  console.log(`[vtecxnext queryBQ] start. sql=${sql} csv=${csv}`)
+ export const getBQ = async (req:IncomingMessage, res:ServerResponse, sql:string, values?:any[], parent?:string) => {
+  console.log(`[vtecxnext getBQ] start. sql=${sql} values=${values}`)
   // 入力チェック
   checkNotNull(sql, 'Query SQL')
-  // 引数
-  const feed:any = {'feed' : {'title' : sql}}
-  if (parent) {
-    feed.feed['subtitle'] = parent
-  }
-  console.log(`[vtecxnext queryBQ] feed=${feed}`)
+  // 引数生成
+  const feed = editGetBqArgument(sql, values, parent)
   // vte.cxへリクエスト
   const method = 'PUT'
-  const url = `/p/?_querybq${csv ? '&_csv' : ''}`
+  const url = `/p/?_querybq`
   const response = await requestVtecx(method, url, req, JSON.stringify(feed))
-  console.log(`[vtecxnext queryBQ] response. status=${response.status}`)
+  console.log(`[vtecxnext getBQ] response. status=${response.status}`)
   // vte.cxからのset-cookieを転記
   setCookie(response, res)
-  console.log(`[vtecxnext queryBQ] setCookie end.`)
+  console.log(`[vtecxnext getBQ] setCookie end.`)
   // レスポンスのエラーチェック
   await checkVtecxResponse(response)
-  console.log(`[vtecxnext queryBQ] checkVtecxResponse end.`)
+  console.log(`[vtecxnext getBQ] checkVtecxResponse end.`)
   // 戻り値
-  if (csv) {
-    return await response.blob()
-  } else {
-    return await response.json()
-  }
+  return await response.json()
+}
+
+/**
+ * Search BigQuery and return results in CSV format.
+ * @param req request (for authentication)
+ * @param res response (for authentication)
+ * @param sql query sql
+ * @param values values of query arguments
+ * @param filename file name of csv
+ * @param parent parent name of result json
+ * @return 
+ */
+ export const getBQCsv = async (req:IncomingMessage, res:ServerResponse, sql:string, values?:any[], filename?:string, parent?:string) => {
+  console.log(`[vtecxnext getBQCsv] start. sql=${sql} values=${values}`)
+  // 入力チェック
+  checkNotNull(sql, 'Query SQL')
+  // 引数生成
+  const feed = editGetBqArgument(sql, values, parent)
+  // vte.cxへリクエスト
+  const method = 'PUT'
+  const url = `/p/?_querybq&_csv${filename ? '=' + filename : ''}`
+  const response = await requestVtecx(method, url, req, JSON.stringify(feed))
+  console.log(`[vtecxnext getBQCsv] response. status=${response.status}`)
+  // vte.cxからのset-cookieを転記
+  setCookie(response, res)
+  console.log(`[vtecxnext getBQCsv] setCookie end.`)
+  // レスポンスのエラーチェック
+  await checkVtecxResponse(response)
+  console.log(`[vtecxnext getBQCsv] checkVtecxResponse end.`)
+  // 戻り値
+  const resData = await response.blob()
+  setResponseHeaders(response, res)
+  const csvData = await resData.arrayBuffer()
+  res.end(csvData)
+  return true
 }
 
 
@@ -1205,4 +1235,36 @@ const editBqTableNames = (tablenames:any) => {
   }
   console.log(`[editBqTableNames] result=${result}`)
   return result
+}
+
+/**
+ * BigQuery検索の引数を生成
+ * @param sql SQL
+ * @param values SQLに指定する値
+ * @param parent 戻り値JSONの親項目(任意)か、CSVのヘッダ(任意)
+ * @returns BigQuery検索の引数
+ */
+const editGetBqArgument = (sql:string, values?:any[], parent?:string) => {
+  // SQLに引数を代入（SQLインジェクション対応）
+  const editSql = values ? formatSql(sql, values) : sql
+  console.log(`[vtecxnext editGetBqArgument] sql=${editSql}`)
+  // 引数
+  const feed:any = {'feed' : {'title' : editSql}}
+  if (parent) {
+    feed.feed['subtitle'] = parent
+  }
+  return feed
+}
+
+/**
+ * SQLの'?'を指定された引数に置き換える。（SQLインジェクション対応）
+ * @param sql SQL
+ * @param values 置き換え対象値
+ * @returns 値が代入されたSQL
+ */
+const formatSql = (sql:string, values:any[]) => {
+  if (!values) {
+    return sql
+  }
+  return SqlString.format(sql, values)
 }

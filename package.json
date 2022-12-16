@@ -18,7 +18,11 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-google-recaptcha-v3": "^1.10.0",
+    "sqlstring": "^2.3.3",
     "typescript": "4.9.3",
     "vtecxauth": "^1.0.2"
+  },
+  "devDependencies": {
+    "@types/sqlstring": "^2.3.0"
   }
 }

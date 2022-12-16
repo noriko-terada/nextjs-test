@@ -159,7 +159,7 @@ const HomePage = (props:Props) => {
       value: 'bigquery_delete',
     },
     {
-      label: 'select bigquery (リクエストデータ(feed.titleにSQL、[feed.subtitleにCSVヘッダ])、URLパラメータ:[_csv])',
+      label: 'get bigquery (リクエストデータ(feed.titleにSQL、[feed.subtitleにCSVヘッダ])、URLパラメータ:[_csv])',
       value: 'bigquery_put',
     },
     {
