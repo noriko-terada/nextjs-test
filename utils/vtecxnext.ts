@@ -48,6 +48,12 @@ type postBQ = (req:IncomingMessage, res:ServerResponse, feed:any, async?:boolean
 type deleteBQ = (req:IncomingMessage, res:ServerResponse, keys:string[], async?:boolean, tablenames?:any) => Promise<boolean>
 type getBQ = (req:IncomingMessage, res:ServerResponse, sql:string, parent?:string) => Promise<any>
 type getBQCsv = (req:IncomingMessage, res:ServerResponse, sql:string, values?:any[], filename?:string, parent?:string) => Promise<boolean>
+type toPdf = (req:IncomingMessage, res:ServerResponse, htmlTemplate:string, filename?:string) => Promise<boolean>
+
+type putSignature = (req:IncomingMessage, res:ServerResponse, uri:string, revision?:number) => Promise<any>
+type putSignatures = (req:IncomingMessage, res:ServerResponse, feed:any) => Promise<any>
+type deleteSignature = (req:IncomingMessage, res:ServerResponse, uri:string, revision?:number) => Promise<boolean>
+type checkSignature = (req:IncomingMessage, res:ServerResponse, uri:string) => Promise<boolean>
 
 /**
  * X-Requested-With header check.
@@ -1028,12 +1034,12 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
 /**
  * Search BigQuery and return results in CSV format.
  * @param req request (for authentication)
- * @param res response (for authentication)
+ * @param res response
  * @param sql query sql
  * @param values values of query arguments
  * @param filename file name of csv
  * @param parent parent name of result json
- * @return 
+ * @return true
  */
  export const getBQCsv = async (req:IncomingMessage, res:ServerResponse, sql:string, values?:any[], filename?:string, parent?:string) => {
   console.log(`[vtecxnext getBQCsv] start. sql=${sql} values=${values}`)
@@ -1057,6 +1063,133 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
   setResponseHeaders(response, res)
   const csvData = await resData.arrayBuffer()
   res.end(csvData)
+  return true
+}
+
+/**
+ * Create PDF
+ * @param req request (for authentication)
+ * @param res response
+ * @param htmlTemplate PDF layout
+ * @param filename PDF file name
+ * @return true
+ */
+ export const toPdf = async (req:IncomingMessage, res:ServerResponse, htmlTemplate:string, filename?:string) => {
+  console.log(`[vtecxnext toPdf] start. htmlTemplate=${htmlTemplate} filename=${filename}`)
+  // 入力チェック
+  checkNotNull(htmlTemplate, 'PDF template')
+  // vte.cxへリクエスト
+  const method = 'PUT'
+  const url = `/p/?_pdf${filename ? '=' + filename : ''}`
+  const response = await requestVtecx(method, url, req, htmlTemplate)
+  console.log(`[vtecxnext toPdf] response. status=${response.status}`)
+  // vte.cxからのset-cookieを転記
+  setCookie(response, res)
+  console.log(`[vtecxnext toPdf] setCookie end.`)
+  // レスポンスのエラーチェック
+  await checkVtecxResponse(response)
+  console.log(`[vtecxnext toPdf] checkVtecxResponse end.`)
+  // 戻り値
+  const resData = await response.blob()
+  setResponseHeaders(response, res)
+  const csvData:ArrayBuffer = await resData.arrayBuffer()
+  res.end(new Uint8Array(csvData))
+  return true
+}
+
+/**
+ * put the signature of uri and revision.
+ * @param req request (for authentication)
+ * @param res response (for authentication)
+ * @param uri key
+ * @param revision revision
+ * @return signed entry
+ */
+ export const putSignature = async (req:IncomingMessage, res:ServerResponse, uri:string, revision?:number) => {
+  console.log('[vtecxnext putSignature] start.')
+  // キー入力値チェック
+  checkUri(uri)
+  // vte.cxへリクエスト
+  const method = 'PUT'
+  const url = `/p${uri}?_signature${revision ? '&r=' + revision : ''}`
+  const response = await requestVtecx(method, url, req)
+  console.log(`[vtecxnext putSignature] response=${response}`)
+  // vte.cxからのset-cookieを転記
+  setCookie(response, res)
+  // レスポンスのエラーチェック
+  await checkVtecxResponse(response)
+  // 戻り値
+  return await getJson(response)
+}
+
+/**
+ * puts the signature of uri and revision.
+ * @param req request (for authentication)
+ * @param res response (for authentication)
+ * @param feed entries
+ * @return signed entries
+ */
+ export const putSignatures = async (req:IncomingMessage, res:ServerResponse, feed:any) => {
+  console.log('[vtecxnext putSignatures] start.')
+  // 入力チェック
+  checkNotNull(feed, 'Feed')
+  // vte.cxへリクエスト
+  const method = 'PUT'
+  const url = `/p/?_signature`
+  const response = await requestVtecx(method, url, req, JSON.stringify(feed))
+  console.log(`[vtecxnext putSignatures] response=${response}`)
+  // vte.cxからのset-cookieを転記
+  setCookie(response, res)
+  // レスポンスのエラーチェック
+  await checkVtecxResponse(response)
+  // 戻り値
+  return await getJson(response)
+}
+
+/**
+ * delete the signature.
+ * @param req request (for authentication)
+ * @param res response (for authentication)
+ * @param uri key
+ * @param revision revision
+ * @return true if successful
+ */
+ export const deleteSignature = async (req:IncomingMessage, res:ServerResponse, uri:string, revision?:number) => {
+  console.log('[vtecxnext deleteSignature] start.')
+  // キー入力値チェック
+  checkUri(uri)
+  // vte.cxへリクエスト
+  const method = 'DELETE'
+  const url = `/p${uri}?_signature${revision ? '&r=' + revision : ''}`
+  const response = await requestVtecx(method, url, req)
+  console.log(`[vtecxnext deleteSignature] response=${response}`)
+  // vte.cxからのset-cookieを転記
+  setCookie(response, res)
+  // レスポンスのエラーチェック
+  await checkVtecxResponse(response)
+  return true
+}
+
+/**
+ * check the signature.
+ * @param req request (for authentication)
+ * @param res response (for authentication)
+ * @param uri key
+ * @return true if the signature is valid
+ */
+ export const checkSignature = async (req:IncomingMessage, res:ServerResponse, uri:string) => {
+  console.log('[vtecxnext checkSignature] start.')
+  // キー入力値チェック
+  checkUri(uri)
+  // vte.cxへリクエスト
+  const method = 'GET'
+  const url = `/p${uri}?_signature`
+  const response = await requestVtecx(method, url, req)
+  console.log(`[vtecxnext checkSignature] response=${response}`)
+  // vte.cxからのset-cookieを転記
+  setCookie(response, res)
+  // レスポンスのエラーチェック
+  await checkVtecxResponse(response)
   return true
 }
 

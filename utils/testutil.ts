@@ -71,6 +71,20 @@ type toNumber = (tmpVal:any) => number
  */
  export const getParamNumber = (req:NextApiRequest, name:string) => {
   const tmpVal = req.query[name]
+  if (!tmpVal) {
+    return undefined
+  }
+  return toNumber(tmpVal)
+}
+
+/**
+ * URLパラメータを取得し、number型で返す. 値の指定がない場合エラーを返す.
+ * @param req リクエスト
+ * @param name パラメータ名
+ * @return パラメータ値
+ */
+ export const getParamNumberRequired = (req:NextApiRequest, name:string) => {
+  const tmpVal = req.query[name]
   return toNumber(tmpVal)
 }
 
@@ -98,11 +112,11 @@ type toNumber = (tmpVal:any) => number
  * @param tmpVal 値
  * @return booleanの値
  */
- export const toBoolean = (tmpVal:any) => {
+ export const toBoolean = (tmpVal:string) => {
   let errMsg = `Not boolean. ${tmpVal}`
   if (tmpVal) {
     try {
-      return Boolean(tmpVal)
+      return tmpVal.toLowerCase() === 'true'
     } catch (e) {
       if (e instanceof Error) {
         errMsg = e.message

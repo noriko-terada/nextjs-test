@@ -58,10 +58,10 @@ const handler = async (req:NextApiRequest, res:NextApiResponse) => {
         const result = await vtecxnext.setSessionString(req, res, name, testutil.getParam(req, 'val'))
         message = `session ${type} set. name=${name} result=${result}`
       } else if (type == 'long') {
-        const result = await vtecxnext.setSessionLong(req, res, name, testutil.getParamNumber(req, 'val'))
+        const result = await vtecxnext.setSessionLong(req, res, name, testutil.getParamNumberRequired(req, 'val'))
         message = `session ${type} set. name=${name} result=${result}`
       } else if (type == 'incr') {
-        message = await vtecxnext.incrementSession(req, res, name, testutil.getParamNumber(req, 'val'))
+        message = await vtecxnext.incrementSession(req, res, name, testutil.getParamNumberRequired(req, 'val'))
       } else {
         console.log(`[session] invalid type. method=${method} type=${type}`)
         throw new ApiRouteTestError(400, `[session] invalid type. ${type}`)

@@ -159,8 +159,28 @@ const HomePage = (props:Props) => {
       value: 'bigquery_delete',
     },
     {
-      label: 'get bigquery (リクエストデータ(feed.titleにSQL、[feed.subtitleにCSVヘッダ])、URLパラメータ:[_csv])',
+      label: 'get bigquery (リクエストデータ(feedのtitleにSQL、[subtitleにCSVヘッダ、category.___labelにパラメータ値、category.___termにパラメータ型])、URLパラメータ:[csv={ダウンロードファイル名(任意)}])',
       value: 'bigquery_put',
+    },
+    {
+      label: 'create pdf (リクエストデータ(PDFテンプレート)、URLパラメータ:[pdf={ダウンロードファイル名(任意)}])',
+      value: 'pdf',
+    },
+    {
+      label: 'put signature (URLパラメータ:uri={キー}[&r={リビジョン}])',
+      value: 'signature_put_1',
+    },
+    {
+      label: 'put signatures (リクエストデータ)',
+      value: 'signature_put_2',
+    },
+    {
+      label: 'delete signature (URLパラメータ:uri={キー}[&r={リビジョン}])',
+      value: 'signature_delete',
+    },
+    {
+      label: 'check signature (URLパラメータ:uri={キー})',
+      value: 'signature_get',
     },
     {
       label: 'logout (/d)',
@@ -216,6 +236,7 @@ const HomePage = (props:Props) => {
     let apiAction
     let additionalParam
     let isJson:boolean = true
+    let filename = ''
     if (action === 'uid' || action === 'uid2' || action === 'whoami' || 
         action === 'isloggedin' || action === 'logout' || 
         action === 'getentry' || action === 'getfeed' || action === 'getcount' ||
@@ -256,28 +277,46 @@ const HomePage = (props:Props) => {
       if (method === 'post' || method === 'put') {
         body = reqdata
       }
-      if (method === 'put' && urlparam.indexOf('_csv') > -1) {
+      if (method === 'put' && urlparam.indexOf('csv') > -1) {
         isJson = false
+        const idx = urlparam.indexOf('csv') + 4
+        filename = urlparam.substring(idx)
       }
-  }
+    } else if (action === 'pdf') {
+      method = 'PUT'
+      body = reqdata
+      apiAction = action
+      isJson = false
+      const idx = urlparam.indexOf('pdf') + 4
+      filename = urlparam.substring(idx)
+    } else if (action.startsWith('signature_')) {
+      const tmpAction = action.substring(10)
+      let tmpIdx = tmpAction.indexOf('_')
+      const idx = tmpIdx < 0 ? tmpAction.length : tmpIdx
+      method = tmpAction.substring(0, idx)
+      apiAction = 'signature'
+      if (method === 'put') {
+        body = reqdata
+      }
+    }
 
     if (method != null && apiAction != null) {
       const data = await request(method, apiAction, body, additionalParam)
-      if (isJson) {
+      if (isJson || 'feed' in data) {
         const feedStr = JSON.stringify(data)
         console.log(`[doRequest] data=${feedStr}`)
         setResult(feedStr)
       } else {
-        // TODO データダウンロード
+        // データダウンロード
         console.log(`[doRequest] isJson=false data=${data}`)
 
-        const anchor = document.createElement("a");
+        const anchor = document.createElement("a")
         anchor.href = URL.createObjectURL(data)
-        anchor.download = "test_vtecxnext.csv";
-        document.body.appendChild(anchor);
-        anchor.click();
-        URL.revokeObjectURL(anchor.href);
-        document.body.removeChild(anchor);
+        anchor.download = filename
+        document.body.appendChild(anchor)
+        anchor.click()
+        URL.revokeObjectURL(anchor.href)
+        document.body.removeChild(anchor)
       }
 
     } else {

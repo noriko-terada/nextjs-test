@@ -21,9 +21,11 @@ const handler = async (req:NextApiRequest, res:NextApiResponse) => {
       // クエリ検索
       const feed = testutil.getRequestJson(req)
       const sql = feed.feed.title
+      console.log(`[bigquery] sql=${sql}`)
       const values:any[] = getValues(feed)
+      console.log(`[bigquery] values=${values}`)
       const parent = feed.feed.subtitle
-      const csv = testutil.hasParam(req, '_csv')
+      const csv = testutil.hasParam(req, 'csv')
       console.log(`[bigquery] csv=${csv}`)
       //const resData:any = await vtecxnext.queryBQ(req, res, sql, parent, csv ? true : false)
       //console.log(`[bigquery] resData=${resData}`)
@@ -41,7 +43,7 @@ const handler = async (req:NextApiRequest, res:NextApiResponse) => {
         }
       } else {
         // 戻り値: CSV
-        const csvname = testutil.getParam(req, '_csv')
+        const csvname = testutil.getParam(req, 'csv')
         const resData = await vtecxnext.getBQCsv(req, res, sql, values, csvname, parent)
         res.statusCode = resData ? 200 : 204
       }
@@ -100,23 +102,26 @@ export default handler
 const getValues = (feed:any) => {
   const values = []
   let idx = 0
-  for (const category of feed.feed.category) {
-    const type = category.___term
-    const tmpVal = category.___label
-    let val
-    if (type) {
-      if (type.equals('int') || type.equals('float')) {
-        val = Number(tmpVal)
-      } else if (type.equals('bool')) {
-        val = Boolean(tmpVal)
+  if ('category' in feed.feed) {
+    for (const category of feed.feed.category) {
+      const type = category.___term
+      const tmpVal = category.___label
+      let val
+      if (type) {
+        if (type === 'int' || type === 'float') {
+          val = Number(tmpVal)
+        } else if (type === 'bool') {
+          val = tmpVal.toLowerCase() === 'true'
+          console.log(`[getValues] inputVal=${tmpVal} result=${val}`)
+        } else {
+          val = String(tmpVal)
+        }
       } else {
         val = String(tmpVal)
       }
-    } else {
-      val = String(tmpVal)
+      values[idx] = val
+      idx++
     }
-    values[idx] = val
-    idx++
   }
   return values
 }
