@@ -183,8 +183,12 @@ const HomePage = (props:Props) => {
       value: 'signature_get',
     },
     {
-      label: 'send mail (リクエストデータ、URLパラメータ:to={to指定メールアドレス,...}[&cc={cc指定メールアドレス,...}&bcc={bcc指定メールアドレス,...}&attachments={添付ファイルのキー,...}])',
+      label: 'send mail (リクエストデータにentry、URLパラメータ:to={to指定メールアドレス,...}[&cc={cc指定メールアドレス,...}&bcc={bcc指定メールアドレス,...}&attachments={添付ファイルのキー,...}])',
       value: 'sendmail',
+    },
+    {
+      label: 'push notification (リクエストデータにentry、URLパラメータ:to={Push通知送信先,...}[&imageUrl={image URL}])',
+      value: 'pushnotification',
     },
     {
       label: 'logout (/d)',
@@ -247,7 +251,8 @@ const HomePage = (props:Props) => {
         action === 'allocids' || action === 'getids' || action === 'getrangeids') {
       method = 'GET'
       apiAction = action
-    } else if (action === 'log' || action === 'postentry' || action === 'sendmail') {
+    } else if (action === 'log' || action === 'postentry' || action === 'sendmail' ||
+        action === 'pushnotification') {
       method = 'POST'
       body = reqdata
       apiAction = action
