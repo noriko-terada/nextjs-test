@@ -49,11 +49,11 @@ type deleteBQ = (req:IncomingMessage, res:ServerResponse, keys:string[], async?:
 type getBQ = (req:IncomingMessage, res:ServerResponse, sql:string, parent?:string) => Promise<any>
 type getBQCsv = (req:IncomingMessage, res:ServerResponse, sql:string, values?:any[], filename?:string, parent?:string) => Promise<boolean>
 type toPdf = (req:IncomingMessage, res:ServerResponse, htmlTemplate:string, filename?:string) => Promise<boolean>
-
 type putSignature = (req:IncomingMessage, res:ServerResponse, uri:string, revision?:number) => Promise<any>
 type putSignatures = (req:IncomingMessage, res:ServerResponse, feed:any) => Promise<any>
 type deleteSignature = (req:IncomingMessage, res:ServerResponse, uri:string, revision?:number) => Promise<boolean>
 type checkSignature = (req:IncomingMessage, res:ServerResponse, uri:string) => Promise<boolean>
+type sendMail = (req:IncomingMessage, res:ServerResponse, entry:any, to:string[], cc?:string[], bcc?:string[], attachments?:string[]) => Promise<boolean>
 
 /**
  * X-Requested-With header check.
@@ -1193,6 +1193,125 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
   return true
 }
 
+/**
+ * Send an mail (with attachments)
+ * @param req request (for authentication)
+ * @param res response (for authentication)
+ * @param entry email contents
+ * @param to email addresses to
+ * @param cc email addresses cc
+ * @param bcc email addresses bcc
+ * @param attachments keys of attachment files
+ * @return true if successful
+ */
+ export const sendMail = async (req:IncomingMessage, res:ServerResponse, entry:any, to:string[], cc?:string[], bcc?:string[], attachments?:string[]) => {
+  console.log(`[vtecxnext sendMail] start. to=${to}`)
+  // 入力チェック
+  checkNotNull(entry, 'Entry')
+  // 引数編集
+  let links:any[] = []
+  const linksTo = getLinks('to', to)
+  console.log(`[vtecxnext sendMail] linksTo=${JSON.stringify(linksTo)}`)
+  if (linksTo) {
+    links = links.concat(linksTo)
+  }
+  if (cc) {
+    const linksCc = getLinks('cc', cc)
+    if (linksCc) {
+      links = links.concat(linksCc)
+    }
+  }
+  if (bcc) {
+    const linksBcc = getLinks('bcc', bcc)
+    if (linksBcc) {
+      links = links.concat(linksBcc)
+    }
+  }
+  if (attachments) {
+    const linksAttachments = getLinks('attachment', attachments)
+    if (linksAttachments) {
+      links = links.concat(linksAttachments)
+    }
+  }
+  console.log(`[vtecxnext sendMail] links = ${JSON.stringify(links)}`)
+  let feed = {'feed' : {'entry' : [entry], 'link' : links}}
+  console.log(`[vtecxnext sendMail] feed = ${JSON.stringify(feed)}`)
+  // vte.cxへリクエスト
+  const method = 'POST'
+  const url = `/p/?_sendmail`
+  const response = await requestVtecx(method, url, req, JSON.stringify(feed))
+  console.log(`[vtecxnext sendMail] response. status=${response.status}`)
+  // vte.cxからのset-cookieを転記
+  setCookie(response, res)
+  // レスポンスのエラーチェック
+  await checkVtecxResponse(response)
+  return true
+}
+
+/**
+ * push notification to clients.
+ * @param req request (for authentication)
+ * @param res response (for authentication)
+ * @param message message
+ * @param to clients to
+ * @param title title
+ * @param subtitle subtitle (Expo)
+ * @param imageUrl url of image (FCM)
+ * @param data key value data (Expo)
+ * @return true if successful
+ */
+ export const pushNotification = async (req:IncomingMessage, res:ServerResponse, message:string, to:string[], title?:string, subtitle?:string, imageUrl?:string, data?:any) => {
+  console.log(`[vtecxnext pushNotification] start. to=${to}`)
+  // 入力チェック
+  checkNotNull(message, 'Message')
+  checkNotNull(to, 'Destination')
+  // 引数編集
+  const links:any[] = []
+  for (const destination of to) {
+    const link = {'___rel' : 'to', '___href' : destination}
+    links.push(link)
+  }
+  const categories:any[] = []
+  if (imageUrl) {
+    const category = {'___scheme' : 'imageurl', '___label' : imageUrl}
+    categories.push(category)
+  }
+  if (data) {
+    for (const name in data) {
+      const category = {'___scheme' : name, '___label' : data[name]}
+      categories.push(category)
+    }
+  }
+  const content = {'______text' : message}
+  const entry:any = {}
+  if (title) {
+    entry['title'] = title
+  }
+  if (subtitle) {
+    entry['subtitle'] = subtitle
+  }
+  entry['content'] = content
+  if (categories) {
+    entry['category'] = categories
+  }
+  const feed = {'feed' : {
+    'entry' : [entry],
+    'link' : links}
+  }
+  console.log(`[vtecxnext pushNotification] feed = ${JSON.stringify(feed)}`)
+  // vte.cxへリクエスト
+  const method = 'POST'
+  const url = `/p/?_pushnotification`
+  const response = await requestVtecx(method, url, req, JSON.stringify(feed))
+  console.log(`[vtecxnext pushNotification] response. status=${response.status}`)
+  // vte.cxからのset-cookieを転記
+  setCookie(response, res)
+  // レスポンスのエラーチェック
+  await checkVtecxResponse(response)
+  return true
+}
+
+
 
 
 //---------------------------------------------
@@ -1400,4 +1519,25 @@ const formatSql = (sql:string, values:any[]) => {
     return sql
   }
   return SqlString.format(sql, values)
+}
+
+/**
+ * linkの編集
+ * @param rel relに指定する値 
+ * @param hrefs hrefに指定する値のリスト
+ * @returns link
+ */
+const getLinks = (rel:string, hrefs:string[]) => {
+  if (!rel || !hrefs) {
+    return undefined
+  }
+  const links = []
+  let idx = 0
+  for (const href of hrefs) {
+    const link = {'___rel' : rel, '___href' : href}
+    links[idx] = link
+    idx++
+  }
+  console.log(`[vtecxnext getLinks] links=${JSON.stringify(links)}`)
+  return links
 }
