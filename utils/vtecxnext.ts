@@ -1409,14 +1409,14 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
  * @param req request (for authentication)
  * @param res response (for authentication)
  * @param group group
- * @param selfid hierarchical name under the group
+ * @param selfid hierarchical name under my group alias
  * @return feed
  */
  export const joinGroup = async (req:IncomingMessage, res:ServerResponse, group:string, selfid:string) => {
   console.log(`[vtecxnext joinGroup] start. group=${group} selfid=${selfid}`)
   // 入力チェック
   checkUri(group)
-  checkNotNull(selfid, 'selfid (hierarchical name under the group)')
+  checkNotNull(selfid, 'selfid (hierarchical name under my group alias)')
   // vte.cxへリクエスト
   const method = 'PUT'
   const url = `/p${group}?_joingroup&_selfid=${selfid}`

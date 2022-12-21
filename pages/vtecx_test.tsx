@@ -203,7 +203,7 @@ const HomePage = (props:Props) => {
       value: 'messagequeue_get',
     },
     {
-      label: 'join group (URLパラメータ:group={グループ}&selfid={グループ配下の階層名})',
+      label: 'join group (URLパラメータ:group={グループ}&selfid={グループエイリアスの末尾名})',
       value: 'group_put',
     },
     {
