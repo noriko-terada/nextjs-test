@@ -10,6 +10,7 @@ type requestVtecx = (method:string, url:string, req:IncomingMessage, body:any) =
 type fetchVtecx = (method:string, url:string, headers:any, body:any) => Promise<Response>
 // ----
 type checkXRequestedWith = (req:IncomingMessage, res:ServerResponse) => boolean
+type sendMessage = (res:ServerResponse, statusCode:number, message:string) => boolean
 type login = (req:IncomingMessage, res:ServerResponse, wsse:string, reCaptchaToken?:string) => Promise<boolean>
 type logout = (req:IncomingMessage, res:ServerResponse) => Promise<boolean>
 type uid = (req:IncomingMessage, res:ServerResponse) => Promise<string>
@@ -54,6 +55,12 @@ type putSignatures = (req:IncomingMessage, res:ServerResponse, feed:any) => Prom
 type deleteSignature = (req:IncomingMessage, res:ServerResponse, uri:string, revision?:number) => Promise<boolean>
 type checkSignature = (req:IncomingMessage, res:ServerResponse, uri:string) => Promise<boolean>
 type sendMail = (req:IncomingMessage, res:ServerResponse, entry:any, to:string[], cc?:string[], bcc?:string[], attachments?:string[]) => Promise<boolean>
+type pushNotification = (req:IncomingMessage, res:ServerResponse, message:string, to:string[], title?:string, subtitle?:string, imageUrl?:string, data?:any) => Promise<boolean>
+type setMessageQueueStatus = (req:IncomingMessage, res:ServerResponse, flag:boolean, channel:string) => Promise<boolean>
+type setMessageQueue = (req:IncomingMessage, res:ServerResponse, feed:any, channel:string) => Promise<boolean>
+type getMessageQueue = (req:IncomingMessage, res:ServerResponse, channel:string) => Promise<any>
+type joinGroup = (req:IncomingMessage, res:ServerResponse, group:string, selfid:string) => Promise<any>
+type leaveGroup = (req:IncomingMessage, res:ServerResponse, group:string) => Promise<boolean>
 
 /**
  * X-Requested-With header check.
@@ -68,6 +75,20 @@ type sendMail = (req:IncomingMessage, res:ServerResponse, entry:any, to:string[]
     res.end()
     return false
   }
+  return true
+}
+
+/**
+ * Sends an feed response(including message) to the client using the specified status.
+ * @param res response
+ * @param statusCode status code
+ * @param message message
+ * @return true
+ */
+ export const sendMessage = (res:ServerResponse, statusCode:number, message:string) => {
+  const resJson = {'feed' : {'title' : message}}
+  res.writeHead(statusCode)
+  res.end(JSON.stringify(resJson))
   return true
 }
 
@@ -1311,8 +1332,127 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
   return true
 }
 
+/**
+ * set status of MessageQueue.
+ * @param req request (for authentication)
+ * @param res response (for authentication)
+ * @param flag true if on, false if off
+ * @param channel channel
+ */
+ export const setMessageQueueStatus = async (req:IncomingMessage, res:ServerResponse, flag:boolean, channel:string) => {
+  console.log(`[vtecxnext setMessageQueueStatus] start. channel=${channel} flag=${flag}`)
+  // キー入力値チェック
+  checkUri(channel)
+  // vte.cxへリクエスト
+  const method = 'PUT'
+  const url = `/p${channel}?_mqstatus=${flag ? 'true' : 'false'}`
+  const response = await requestVtecx(method, url, req)
+  console.log(`[vtecxnext setMessageQueueStatus] response=${response}`)
+  // vte.cxからのset-cookieを転記
+  setCookie(response, res)
+  // レスポンスのエラーチェック
+  await checkVtecxResponse(response)
+  return true
+}
 
+/**
+ * set MessageQueue.
+ * @param req request (for authentication)
+ * @param res response (for authentication)
+ * @param feed entries (JSON)
+ * @param channel channel
+ * @return true if successful
+ */
+ export const setMessageQueue = async (req:IncomingMessage, res:ServerResponse, feed:any, channel:string) => {
+  console.log(`[vtecxnext setMessageQueue] start. channel=${channel} feed=${feed}`)
+  // 入力チェック
+  checkUri(channel)
+  checkNotNull(feed, 'Feed')
+  // vte.cxへリクエスト
+  const method = 'POST'
+  const url = `/p${channel}?_mq`
+  const response = await requestVtecx(method, url, req, JSON.stringify(feed))
+  console.log(`[vtecxnext setMessageQueue] response. status=${response.status}`)
+  // vte.cxからのset-cookieを転記
+  setCookie(response, res)
+  // レスポンスのエラーチェック
+  await checkVtecxResponse(response)
+  return true
+}
 
+/**
+ * get feed from session
+ * @param req request (for authentication)
+ * @param res response (for authentication)
+ * @param name name
+ * @return feed
+ */
+ export const getMessageQueue = async (req:IncomingMessage, res:ServerResponse, channel:string) => {
+  console.log(`[vtecxnext getMessageQueue] start. channel=${channel}`)
+  // 入力チェック
+  checkUri(channel)
+  // vte.cxへリクエスト
+  const method = 'GET'
+  const url = `/p${channel}?_mq`
+  const response = await requestVtecx(method, url, req)
+  console.log(`[vtecxnext getMessageQueue] response. status=${response.status}`)
+  // vte.cxからのset-cookieを転記
+  setCookie(response, res)
+  // レスポンスのエラーチェック
+  await checkVtecxResponse(response)
+  // 戻り値
+  return await getJson(response)
+}
+
+/**
+ * join to the group
+ * @param req request (for authentication)
+ * @param res response (for authentication)
+ * @param group group
+ * @param selfid hierarchical name under the group
+ * @return feed
+ */
+ export const joinGroup = async (req:IncomingMessage, res:ServerResponse, group:string, selfid:string) => {
+  console.log(`[vtecxnext joinGroup] start. group=${group} selfid=${selfid}`)
+  // 入力チェック
+  checkUri(group)
+  checkNotNull(selfid, 'selfid (hierarchical name under the group)')
+  // vte.cxへリクエスト
+  const method = 'PUT'
+  const url = `/p${group}?_joingroup&_selfid=${selfid}`
+  const response = await requestVtecx(method, url, req)
+  console.log(`[vtecxnext joinGroup] response. status=${response.status}`)
+  // vte.cxからのset-cookieを転記
+  setCookie(response, res)
+  // レスポンスのエラーチェック
+  await checkVtecxResponse(response)
+  // 戻り値
+  return await getJson(response)
+}
+
+/**
+ * leave from the group
+ * @param req request (for authentication)
+ * @param res response (for authentication)
+ * @param group group
+ * @return feed
+ */
+ export const leaveGroup = async (req:IncomingMessage, res:ServerResponse, group:string) => {
+  console.log(`[vtecxnext leaveGroup] start. group=${group}`)
+  // 入力チェック
+  checkUri(group)
+  // vte.cxへリクエスト
+  const method = 'DELETE'
+  const url = `/p${group}?_leavegroup`
+  const response = await requestVtecx(method, url, req)
+  console.log(`[vtecxnext leaveGroup] response. status=${response.status}`)
+  // vte.cxからのset-cookieを転記
+  setCookie(response, res)
+  // レスポンスのエラーチェック
+  await checkVtecxResponse(response)
+  // 戻り値
+  return true
+}
 
 //---------------------------------------------
 /**

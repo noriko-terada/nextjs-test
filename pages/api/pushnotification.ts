@@ -40,13 +40,19 @@ const handler = async (req:NextApiRequest, res:NextApiResponse) => {
     // content: Push通知メッセージ本文(body)
     // summary: dataに設定するメッセージ(Expo用)
     // category _$scheme={dataのキー} _$label={dataの値}(Expo用)
-    const message = entry.content['______text']
-    const title = 'title' in entry ? entry['title'] : undefined
-    const subtitle = 'subtitle' in entry ? entry['subtitle'] : undefined
-    const data:any = {}
-    if ('category' in entry) {
-      for (const category of entry['category']) {
-        data[category['___scheme']] = category['___label']
+    let message
+    let title
+    let subtitle
+    let data:any
+    if (entry) {
+      message = 'content' in entry && '______text' in entry.content ? entry.content['______text'] : undefined
+      title = 'title' in entry ? entry['title'] : undefined
+      subtitle = 'subtitle' in entry ? entry['subtitle'] : undefined
+      data = {}
+      if ('category' in entry) {
+        for (const category of entry['category']) {
+          data[category['___scheme']] = category['___label']
+        }
       }
     }
 
@@ -58,6 +64,10 @@ const handler = async (req:NextApiRequest, res:NextApiResponse) => {
       console.log(`[pushnotification] Error occured. status=${error.status} ${error.message}`)
       resStatus = error.status
       resMessage = error.message
+    } else if (error instanceof Error) {
+      console.log(`[pushnotification] Error occured. (not VtecxNextError) ${error.name}: ${error.message} ${error.stack}`)
+      resStatus = 503
+      resMessage = 'Error occured.'
     } else {
       console.log(`[pushnotification] Error occured. (not VtecxNextError) ${error}`)
       resStatus = 503

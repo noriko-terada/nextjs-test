@@ -187,8 +187,32 @@ const HomePage = (props:Props) => {
       value: 'sendmail',
     },
     {
-      label: 'push notification (リクエストデータにentry、URLパラメータ:to={Push通知送信先,...}[&imageUrl={image URL}])',
+      label: 'push notification (リクエストデータにentry(content.______textにメッセージ[、title、subtitle、category._$schemeにdataのキー、category._$labelにdataの値])、URLパラメータ:to={Push通知送信先,...}[&imageUrl={image URL}])',
       value: 'pushnotification',
+    },
+    {
+      label: 'set message queue status (URLパラメータ:channel={チャネル}&flag={true|false})',
+      value: 'messagequeue_put',
+    },
+    {
+      label: 'send message queue (リクエストデータにfeed(entryのsummaryにメッセージ、link.___relにto、___hrefにPush通知送信先、content.______textにPush通知用メッセージ[、title、subtitle、category._$schemeにdataのキー、category._$labelにdataの値])、URLパラメータ:channel={チャネル})',
+      value: 'messagequeue_post',
+    },
+    {
+      label: 'get message queue (URLパラメータ:channel={チャネル})',
+      value: 'messagequeue_get',
+    },
+    {
+      label: 'join group (URLパラメータ:group={グループ}&selfid={グループ配下の階層名})',
+      value: 'group_put',
+    },
+    {
+      label: 'leave group (URLパラメータ:group={グループ})',
+      value: 'group_delete',
+    },
+    {
+      label: 'send message (URLパラメータ:status={ステータス}&message={メッセージ})',
+      value: 'sendmessage',
     },
     {
       label: 'logout (/d)',
@@ -248,7 +272,8 @@ const HomePage = (props:Props) => {
     if (action === 'uid' || action === 'uid2' || action === 'whoami' || 
         action === 'isloggedin' || action === 'logout' || 
         action === 'getentry' || action === 'getfeed' || action === 'getcount' ||
-        action === 'allocids' || action === 'getids' || action === 'getrangeids') {
+        action === 'allocids' || action === 'getids' || action === 'getrangeids' ||
+        action === 'sendmessage') {
       method = 'GET'
       apiAction = action
     } else if (action === 'log' || action === 'postentry' || action === 'sendmail' ||
@@ -307,6 +332,18 @@ const HomePage = (props:Props) => {
       if (method === 'put') {
         body = reqdata
       }
+    } else if (action.startsWith('messagequeue_')) {
+      const tmpAction = action.substring(13)
+      let tmpIdx = tmpAction.indexOf('_')
+      const idx = tmpIdx < 0 ? tmpAction.length : tmpIdx
+      method = tmpAction.substring(0, idx)
+      apiAction = 'messagequeue'
+      if (method === 'put' || method === 'post') {
+        body = reqdata
+      }
+    } else if (action.startsWith('group_')) {
+      method = action.substring(6)
+      apiAction = 'group'
     }
 
     if (method != null && apiAction != null) {
