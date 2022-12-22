@@ -9,20 +9,20 @@ const handler = async (req:NextApiRequest, res:NextApiResponse) => {
     return
   }
   // キーを取得
-  const tmpUri = req.query['uri']
-  const uri = tmpUri ? String(tmpUri) : ''
+  const tmpKey = req.query['key']
+  const key = tmpKey ? String(tmpKey) : ''
   const tmpRevision = req.query['r']
   const revision = tmpRevision ? Number(tmpRevision) : undefined
 
-  console.log(`[deleteentry] uri=${uri} r=${revision}`)
+  console.log(`[deleteentry] key=${key} r=${revision}`)
 
   // 削除
   let resStatus:number
   let resMessage:string
   try {
-    await vtecxnext.deleteEntry(req, res, uri, revision)
+    await vtecxnext.deleteEntry(req, res, key, revision)
     resStatus = 200
-    resMessage = `entry deleted. ${uri}`
+    resMessage = `entry deleted. ${key}`
   } catch (error) {
     if (error instanceof VtecxNextError) {
       console.log(`[deleteentry] Error occured. status=${error.status} ${error.message}`)

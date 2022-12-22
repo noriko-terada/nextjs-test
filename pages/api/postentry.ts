@@ -9,9 +9,9 @@ const handler = async (req:NextApiRequest, res:NextApiResponse) => {
     return
   }
   // 引数を取得
-  const tmpUri = req.query['uri']
-  const uri:string = tmpUri ? String(tmpUri) : ''
-  console.log(`[postentry] uri=${uri}`)
+  const tmpKey = req.query['key']
+  const key:string = tmpKey ? String(tmpKey) : ''
+  console.log(`[postentry] key=${key}`)
 
   // 登録
   let resStatus:number
@@ -34,7 +34,7 @@ const handler = async (req:NextApiRequest, res:NextApiResponse) => {
   }
 
   try {
-    resJson = await vtecxnext.post(req, res, feed, uri)
+    resJson = await vtecxnext.post(req, res, feed, key)
     resStatus = 200
   } catch (error) {
     let resErrMsg:string

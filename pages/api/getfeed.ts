@@ -11,22 +11,22 @@ const handler = async (req:NextApiRequest, res:NextApiResponse) => {
     return
   }
   // リクエストパラメータ
-  let uri = ''
+  let key = ''
   let param = ''
   for (const tmpkey in req.query) {
-    if (tmpkey === 'uri') {
-      uri = testutil.toString(req.query[tmpkey])
+    if (tmpkey === 'key') {
+      key = testutil.toString(req.query[tmpkey])
     } else {
       param = `${param}${param ? '&' : '?'}${tmpkey}=${req.query[tmpkey]}`
     }
   }
-  console.log(`[getfeed] uri=${uri} param=${param}`)
+  console.log(`[getfeed] key=${key} param=${param}`)
 
   // フィード取得
   let resStatus:number
   let resJson:any
   try {
-    const requesturi = `${uri}${param}`
+    const requesturi = `${key}${param}`
     resJson = await vtecxnext.getFeed(req, res, requesturi)
     resStatus = resJson ? 200 : 204
   } catch (error) {

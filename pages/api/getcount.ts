@@ -9,23 +9,23 @@ const handler = async (req:NextApiRequest, res:NextApiResponse) => {
     return
   }
   // リクエストパラメータ
-  let uri = ''
+  let key = ''
   let param = ''
   for (const tmpkey in req.query) {
-    if (tmpkey === 'uri') {
-      uri = `${req.query[tmpkey]}`
+    if (tmpkey === 'key') {
+      key = `${req.query[tmpkey]}`
     } else {
       param = `${param}${param ? '&' : '?'}${tmpkey}=${req.query[tmpkey]}`
     }
   }
-  console.log(`[getcount] uri=${uri}`)
+  console.log(`[getcount] key=${key}`)
   console.log(`[getcount] param=${param}`)
 
   // 件数取得
   let resStatus:number
   let resMessage:string
   try {
-    const requesturi = `${uri}${param}`
+    const requesturi = `${key}${param}`
     resMessage = String(await vtecxnext.count(req, res, requesturi))
     resStatus = 200
   } catch (error) {

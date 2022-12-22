@@ -11,13 +11,13 @@ const handler = async (req:NextApiRequest, res:NextApiResponse) => {
     return
   }
   // パラメータを取得
-  let uri = ''
+  let key = ''
   let param = ''
   let pagerange = ''
   let num = undefined
   for (const tmpkey in req.query) {
-    if (tmpkey === 'uri') {
-      uri = testutil.toString(req.query[tmpkey])
+    if (tmpkey === 'key') {
+      key = testutil.toString(req.query[tmpkey])
     } else if (tmpkey === '_pagination') {
       pagerange = testutil.toString(req.query[tmpkey])
     } else if (tmpkey === 'n') {
@@ -26,9 +26,9 @@ const handler = async (req:NextApiRequest, res:NextApiResponse) => {
       param = `${param}${param ? '&' : '?'}${tmpkey}=${req.query[tmpkey]}`
     }
   }
-  const requesturi = `${uri}${param}`
+  const requesturi = `${key}${param}`
 
-  console.log(`[paging] uri=${uri} pagerange=${pagerange} num=${String(num)}`)
+  console.log(`[paging] key=${key} pagerange=${pagerange} num=${String(num)}`)
   // ページング
   let resStatus:number = 200
   let resJson:any
@@ -42,8 +42,8 @@ const handler = async (req:NextApiRequest, res:NextApiResponse) => {
       resJson = await vtecxnext.getPage(req, res, requesturi, testutil.toNumber(num))
       resStatus = resJson ? 200 : 204
     } else {
-      console.log(`[paging] invalid type. uri=${uri}`)
-      throw new ApiRouteTestError(400, `[paging] invalid type. uri=${uri}`)
+      console.log(`[paging] invalid type. key=${key}`)
+      throw new ApiRouteTestError(400, `[paging] invalid type. key=${key}`)
     }
 
   } catch (error) {

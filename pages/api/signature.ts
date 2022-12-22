@@ -13,14 +13,14 @@ const handler = async (req:NextApiRequest, res:NextApiResponse) => {
   // methodを取得
   const method = req.method
   // キー
-  const uri = testutil.getParam(req, 'uri')
-  console.log(`[signature] method=${method} uri=${uri}`)
+  const key = testutil.getParam(req, 'key')
+  console.log(`[signature] method=${method} key=${key}`)
   // 署名処理
   let resStatus:number = 200
   let resJson:any
   try {
     if (method === 'GET') {
-      const result = await vtecxnext.checkSignature(req, res, uri)
+      const result = await vtecxnext.checkSignature(req, res, key)
       if (result) {
         resJson = {feed : {'title' : result}}
       } else {
@@ -35,12 +35,12 @@ const handler = async (req:NextApiRequest, res:NextApiResponse) => {
       } else {
         // 1件
         const revision = testutil.getParamNumber(req, 'r')
-        resJson = await vtecxnext.putSignature(req, res, uri, revision)
+        resJson = await vtecxnext.putSignature(req, res, key, revision)
       }
 
     } else if (method === 'DELETE') {
       const revision = testutil.getParamNumber(req, 'r')
-      const result = await vtecxnext.deleteSignature(req, res, uri, revision)
+      const result = await vtecxnext.deleteSignature(req, res, key, revision)
       if (result) {
         resJson = {feed : {'title' : result}}
       } else {

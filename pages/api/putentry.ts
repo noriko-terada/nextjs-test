@@ -30,7 +30,18 @@ const handler = async (req:NextApiRequest, res:NextApiResponse) => {
   }
 
   try {
-    resJson = await vtecxnext.put(req, res, feed)
+    const isbulkStr = req.query['isbulk']
+    //const isbulk = isbulkStr ? 'true' === isbulkStr ? true : false : undefined
+    const isbulk = isbulkStr != undefined ? true : false
+    const parallelStr = req.query['parallel']
+    //const parallel = parallelStr ? 'true' === parallelStr ? true : false : undefined
+    const parallel = parallelStr != undefined ? true : false
+    const asyncStr = req.query['async']
+    //const async = asyncStr ? 'true' === asyncStr ? true : false : undefined
+    const async = asyncStr != undefined ? true : false
+    console.log(`[putentry] isbulk=${isbulk} parallel=${parallel} async=${async}`)
+
+    resJson = await vtecxnext.put(req, res, feed, isbulk, parallel, async)
     resStatus = 200
   } catch (error) {
     let resErrMsg:string

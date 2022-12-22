@@ -9,14 +9,14 @@ const handler = async (req:NextApiRequest, res:NextApiResponse) => {
     return
   }
   // キーを取得
-  const tmpUri = req.query['uri']
-  const uri:string = tmpUri ? String(tmpUri) : ''
-  console.log(`[getentry] uri=${uri}`)
+  const tmpKey = req.query['key']
+  const key:string = tmpKey ? String(tmpKey) : ''
+  console.log(`[getentry] key=${key}`)
   // エントリー取得
   let resStatus:number
   let resJson:any
   try {
-    resJson = await vtecxnext.getEntry(req, res, uri)
+    resJson = await vtecxnext.getEntry(req, res, key)
     resStatus = resJson ? 200 : 204
   } catch (error) {
     let resErrMsg:string

@@ -12,213 +12,386 @@ const HomePage = (props:Props) => {
   const [urlparam, setUrlparam] = useState('');
   const [reqdata, setReqdata] = useState('');
   const [result, setResult] = useState('');
+  const [descriptionUrlparam, setDescriptionUrlparam] = useState('');
+  const [descriptionReqdata, setDescriptionReqdata] = useState('');
 
   const options = [
     {
       label: '--- 選択してください ---',
       value: 'select',
+      labelUrlparam: '',
+      labelReqdata: '',
     },
     {
       label: 'uid (/d)',
       value: 'uid',
+      labelUrlparam: '',
+      labelReqdata: '',
     },
     {
       label: 'uid2 (run twice) (/d)',
       value: 'uid2',
+      labelUrlparam: '',
+      labelReqdata: '',
     },
     {
       label: 'whoami (/d)',
       value: 'whoami',
+      labelUrlparam: '',
+      labelReqdata: '',
     },
     {
       label: 'is logged in',
       value: 'isloggedin',
+      labelUrlparam: '',
+      labelReqdata: '',
     },
     {
-      label: 'post log (リクエストデータ)',
+      label: 'post log',
       value: 'log',
+      labelUrlparam: '',
+      labelReqdata: 'feed',
     },
     {
-      label: 'get entry (URLパラメータ:uri)',
+      label: 'get entry',
       value: 'getentry',
+      labelUrlparam: 'key={キー}',
+      labelReqdata: '',
     },
     {
-      label: 'get feed (URLパラメータ:uri={キー}[&検索条件])',
+      label: 'get feed',
       value: 'getfeed',
+      labelUrlparam: 'key={キー}[&検索条件]',
+      labelReqdata: '',
     },
     {
-      label: 'get count (URLパラメータ:uri={キー}[&検索条件])',
+      label: 'get count',
       value: 'getcount',
+      labelUrlparam: 'key={キー}[&検索条件]',
+      labelReqdata: '',
     },
     {
-      label: 'post entry (リクエストデータ、[URLパラメータ:uri={親キー}])',
+      label: 'post entry',
       value: 'postentry',
+      labelUrlparam: '[key={親キー}]',
+      labelReqdata: 'feed',
     },
     {
-      label: 'put entry (リクエストデータ)',
+      label: 'put entry',
       value: 'putentry',
+      labelUrlparam: '[isbulk&parallel&async]',
+      labelReqdata: 'feed',
     },
     {
-      label: 'delete entry (URLパラメータ:uri={キー}[&r={リビジョン}])',
+      label: 'delete entry',
       value: 'deleteentry',
+      labelUrlparam: 'key={キー}[&r={リビジョン}]',
+      labelReqdata: '',
     },
     {
-      label: 'delete folder (URLパラメータ:uri={親キー}[&_async])',
+      label: 'delete folder',
       value: 'deletefolder',
+      labelUrlparam: 'key={親キー}[&_async]',
+      labelReqdata: '',
     },
     {
-      label: 'allocids (URLパラメータ:uri={キー}&num={採番数})',
+      label: 'allocids',
       value: 'allocids',
+      labelUrlparam: 'key={キー}&num={採番数}',
+      labelReqdata: '',
     },
     {
-      label: 'addids (URLパラメータ:uri={キー}&num={加算数})',
+      label: 'addids',
       value: 'addids',
+      labelUrlparam: 'key={キー}&num={加算数}',
+      labelReqdata: '',
     },
     {
-      label: 'getids (URLパラメータ:uri={キー})',
+      label: 'getids',
       value: 'getids',
+      labelUrlparam: 'key={キー}',
+      labelReqdata: '',
     },
     {
-      label: 'setids (URLパラメータ:uri={キー}&num={加算設定数})',
+      label: 'setids',
       value: 'setids',
+      labelUrlparam: 'key={キー}&num={加算設定数}',
+      labelReqdata: '',
     },
     {
-      label: 'rangeids (URLパラメータ:uri={キー}&range={加算枠})',
+      label: 'rangeids',
       value: 'rangeids',
+      labelUrlparam: 'key={キー}&range={加算枠}',
+      labelReqdata: '',
     },
     {
-      label: 'getrangeids (URLパラメータ:uri={キー})',
+      label: 'getrangeids',
       value: 'getrangeids',
+      labelUrlparam: 'key={キー}',
+      labelReqdata: '',
     },
     {
-      label: 'get session feed (URLパラメータ:name={名前})',
+      label: 'get session feed',
       value: 'session_get_feed',
+      labelUrlparam: 'name={名前}',
+      labelReqdata: '',
     },
     {
-      label: 'get session entry (URLパラメータ:name={名前})',
+      label: 'get session entry',
       value: 'session_get_entry',
+      labelUrlparam: 'name={名前}',
+      labelReqdata: '',
     },
     {
-      label: 'get session string (URLパラメータ:name={名前})',
+      label: 'get session string',
       value: 'session_get_string',
+      labelUrlparam: 'name={名前}',
+      labelReqdata: '',
     },
     {
-      label: 'get session long (URLパラメータ:name={名前})',
+      label: 'get session long',
       value: 'session_get_long',
+      labelUrlparam: 'name={名前}',
+      labelReqdata: '',
     },
     {
-      label: 'set session feed (リクエストデータ、URLパラメータ:name={名前})',
+      label: 'set session feed',
       value: 'session_put_feed',
+      labelUrlparam: 'name={名前}',
+      labelReqdata: 'feed',
     },
     {
-      label: 'set session entry (リクエストデータ、URLパラメータ:name={名前})',
+      label: 'set session entry',
       value: 'session_put_entry',
+      labelUrlparam: 'name={名前}',
+      labelReqdata: 'feed (entry1件)',
     },
     {
-      label: 'set session string (URLパラメータ:name={名前}&val={値})',
+      label: 'set session string',
       value: 'session_put_string',
+      labelUrlparam: 'name={名前}&val={値}',
+      labelReqdata: '',
     },
     {
-      label: 'set session long (URLパラメータ:name={名前}&val={数値})',
+      label: 'set session long',
       value: 'session_put_long',
+      labelUrlparam: 'name={名前}&val={数値}',
+      labelReqdata: '',
     },
     {
-      label: 'increment session (URLパラメータ:name={名前}&val={数値})',
+      label: 'increment session',
       value: 'session_put_incr',
+      labelUrlparam: 'name={名前}&val={数値}',
+      labelReqdata: '',
     },
     {
-      label: 'delete session feed (URLパラメータ:name={名前})',
+      label: 'delete session feed',
       value: 'session_delete_feed',
+      labelUrlparam: 'name={名前}',
+      labelReqdata: '',
     },
     {
-      label: 'delete session entry (URLパラメータ:name={名前})',
+      label: 'delete session entry',
       value: 'session_delete_entry',
+      labelUrlparam: 'name={名前}',
+      labelReqdata: '',
     },
     {
-      label: 'delete session string (URLパラメータ:name={名前})',
+      label: 'delete session string',
       value: 'session_delete_string',
+      labelUrlparam: 'name={名前}',
+      labelReqdata: '',
     },
     {
-      label: 'delete session long (URLパラメータ:name={名前})',
+      label: 'delete session long',
       value: 'session_delete_long',
+      labelUrlparam: 'name={名前}',
+      labelReqdata: '',
     },
     {
-      label: 'pagination (URLパラメータ:uri={キー}[&検索条件]&_pagination={ページ範囲})',
+      label: 'pagination',
       value: 'paging_pagination',
+      labelUrlparam: 'key={キー}[&検索条件]&_pagination={ページ範囲}',
+      labelReqdata: '',
     },
     {
-      label: 'get page (URLパラメータ:uri={キー}[&検索条件]&n={ページ番号})',
+      label: 'get page',
       value: 'paging_getpage',
+      labelUrlparam: 'key={キー}[&検索条件]&n={ページ番号}',
+      labelReqdata: '',
     },
     {
-      label: 'post bigquery (リクエストデータ、URLパラメータ:[_async&tablenames={エンティティの第一階層名}:{テーブル名},...])',
+      label: 'post bigquery',
       value: 'bigquery_post',
+      labelUrlparam: '[_async&tablenames={エンティティの第一階層名}:{テーブル名},...]',
+      labelReqdata: 'feed',
     },
     {
-      label: 'delete bigquery (URLパラメータ:uri={キー[,キー,...]}[&_async&tablenames={エンティティの第一階層名}:{テーブル名},...])',
+      label: 'delete bigquery',
       value: 'bigquery_delete',
+      labelUrlparam: 'key={キー[,キー,...]}[&_async&tablenames={エンティティの第一階層名}:{テーブル名},...]',
+      labelReqdata: '',
     },
     {
-      label: 'get bigquery (リクエストデータ(feedのtitleにSQL、[subtitleにCSVヘッダ、category.___labelにパラメータ値、category.___termにパラメータ型])、URLパラメータ:[csv={ダウンロードファイル名(任意)}])',
+      label: 'get bigquery',
       value: 'bigquery_put',
+      labelUrlparam: '[csv={ダウンロードファイル名]',
+      labelReqdata: `{"feed" : {
+        "title" : 「SQL」,
+        "subtitle" : 「CSVヘッダ(任意)」,
+        "category" : [
+          {
+            "___label" : 「パラメータ値(任意)」,
+            "___term" : 「パラメータ型(任意)」
+          }, ...
+        ]
+    }}`,
     },
     {
-      label: 'create pdf (リクエストデータ(PDFテンプレート)、URLパラメータ:[pdf={ダウンロードファイル名(任意)}])',
+      label: 'create pdf',
       value: 'pdf',
+      labelUrlparam: '[pdf={ダウンロードファイル名]',
+      labelReqdata: 'PDFテンプレートHTML',
     },
     {
-      label: 'put signature (URLパラメータ:uri={キー}[&r={リビジョン}])',
+      label: 'put signature',
       value: 'signature_put_1',
+      labelUrlparam: 'key={キー}[&r={リビジョン}]]',
+      labelReqdata: '',
     },
     {
-      label: 'put signatures (リクエストデータ)',
+      label: 'put signatures',
       value: 'signature_put_2',
+      labelUrlparam: '',
+      labelReqdata: `「feed」
+      [
+        {
+          "link" : [
+            {"___rel": "self", "___href" : 「署名対象キー」}
+          ]
+        }, ...
+      ]`,
     },
     {
-      label: 'delete signature (URLパラメータ:uri={キー}[&r={リビジョン}])',
+      label: 'delete signature',
       value: 'signature_delete',
+      labelUrlparam: 'key={キー}[&r={リビジョン}]]',
+      labelReqdata: '',
     },
     {
-      label: 'check signature (URLパラメータ:uri={キー})',
+      label: 'check signature',
       value: 'signature_get',
+      labelUrlparam: 'key={キー}',
+      labelReqdata: '',
     },
     {
-      label: 'send mail (リクエストデータにentry、URLパラメータ:to={to指定メールアドレス,...}[&cc={cc指定メールアドレス,...}&bcc={bcc指定メールアドレス,...}&attachments={添付ファイルのキー,...}])',
+      label: 'send mail',
       value: 'sendmail',
+      labelUrlparam: 'to={to指定メールアドレス,...}[&cc={cc指定メールアドレス,...}&bcc={bcc指定メールアドレス,...}&attachments={添付ファイルのキー,...}]',
+      labelReqdata: `「entry」
+      {
+        "title" : 「メールのタイトル」,
+        "summary" : 「テキストメッセージ」,
+        "content" : {
+          "______text" : 「HTMLメッセージ」
+        }
+      }
+      `,
     },
     {
-      label: 'push notification (リクエストデータにentry(content.______textにメッセージ[、title、subtitle、category._$schemeにdataのキー、category._$labelにdataの値])、URLパラメータ:to={Push通知送信先,...}[&imageUrl={image URL}])',
+      label: 'push notification',
       value: 'pushnotification',
+      labelUrlparam: 'to={Push通知送信先(グループ、UID、アカウントのいずれか),...}[&imageUrl={通知イメージURL(FCM用)}]',
+      labelReqdata: `「entry」
+      {
+        "title" : 「Push通知タイトル(任意)」,
+        "subtitle" : 「Push通知サブタイトル(任意)」,
+        "content" : {
+          "______text" : 「Push通知メッセージ本文」
+        },
+        "category" : [
+          {
+            "___scheme" : 「dataのキー(Expo用)(任意)」,
+            "___label" : 「dataの値(Expo用)(任意)」
+          }, ...
+        ]
+      }
+      `,
     },
     {
-      label: 'set message queue status (URLパラメータ:channel={チャネル}&flag={true|false})',
+      label: 'set message queue status',
       value: 'messagequeue_put',
+      labelUrlparam: 'channel={チャネル}&flag={true|false}',
+      labelReqdata: '',
     },
     {
-      label: 'send message queue (リクエストデータにfeed(entryのsummaryにメッセージ、link.___relにto、___hrefにPush通知送信先、content.______textにPush通知用メッセージ[、title、subtitle、category._$schemeにdataのキー、category._$labelにdataの値])、URLパラメータ:channel={チャネル})',
+      label: 'send message queue',
       value: 'messagequeue_post',
+      labelUrlparam: 'channel={チャネル}',
+      labelReqdata: `「feed」
+      [
+        {
+          "link" : [
+            {"___rel": "to", "___href" : 「メッセージ送信先("*"(グループメンバー)、UID、アカウントのいずれか)」}
+          ]
+          "summary" : 「メッセージ」
+          "title" : 「Push通知用タイトル(任意)」,
+          "subtitle" : 「Push通知用サブタイトル(任意)」,
+          "content" : {
+            "______text" : 「Push通知用メッセージ本文」
+          },
+          "category" : [
+            {
+              "___scheme" : 「Push通知用dataのキー(Expo用)(任意)」,
+              "___label" : 「Push通知用dataの値(Expo用)(任意)」
+            }, ...
+          ]
+        }
+      }
+      `,
     },
     {
-      label: 'get message queue (URLパラメータ:channel={チャネル})',
+      label: 'get message queue',
       value: 'messagequeue_get',
+      labelUrlparam: 'channel={チャネル}',
+      labelReqdata: '',
     },
     {
-      label: 'join group (URLパラメータ:group={グループ}&selfid={グループエイリアスの末尾名})',
+      label: 'join group',
       value: 'group_put',
+      labelUrlparam: 'group={グループ}&selfid={グループエイリアスの末尾名})',
+      labelReqdata: '',
     },
     {
-      label: 'leave group (URLパラメータ:group={グループ})',
+      label: 'leave group',
       value: 'group_delete',
+      labelUrlparam: 'group={グループ}',
+      labelReqdata: '',
     },
     {
-      label: 'send message (URLパラメータ:status={ステータス}&message={メッセージ})',
+      label: 'send message',
       value: 'sendmessage',
+      labelUrlparam: 'status={ステータス}&message={メッセージ}',
+      labelReqdata: '',
     },
     {
       label: 'logout (/d)',
       value: 'logout',
+      labelUrlparam: '',
+      labelReqdata: '',
     },
-  ];
+  ]
+
+  const onChangeOption = (eTarget:EventTarget & HTMLSelectElement) => {
+    console.log(`[onChangeOption] start. ${eTarget.value}`)
+    setAction(eTarget.value)
+    for (const option of options) {
+      if (eTarget.value === option.value) {
+        setDescriptionUrlparam(option.labelUrlparam)
+        setDescriptionReqdata(option.labelReqdata)
+      }
+    }
+  }
 
   /**
    * 戻り値がJSONのリクエスト
@@ -375,13 +548,15 @@ const HomePage = (props:Props) => {
   const colsTextarea = 50
   //console.log(`[HomePage] props.isLoggedin=${props.isLoggedin}`)
 
+  // <select name="action" value={action} onChange={(e) => setAction(e.target.value)}>
+
   return (
     <div>
       <Header title="vte.cx 汎用APIテスト" />
       <label>【getServerSideProps】 is logged in: {props.isLoggedin}</label>
       <br/>
       <br/>
-      <select name="action" value={action} onChange={(e) => setAction(e.target.value)}>
+      <select name="action" value={action} onChange={(e) => onChangeOption(e.target)}>
         {options.map((option) => (
           <option key={option.value} value={option.value}>{option.label}</option>
         ))}
@@ -393,11 +568,13 @@ const HomePage = (props:Props) => {
             <td align="right" valign="top"><label>URLパラメータ: </label></td>
             <td valign="top"><input type="text" size={sizeText} id="urlparam" name="urlparam" value={urlparam} 
                        onChange={(event) => setUrlparam(event.target.value)} /></td>
+            <td valign="top"><label>{descriptionUrlparam}</label></td>
           </tr>
           <tr>
             <td align="right" valign="top"><label>リクエストデータ: </label></td>
             <td valign="top"><textarea rows={rowTextarea} cols={colsTextarea} id="reqdata" name="reqdata" value={reqdata}
                        onChange={(event) => setReqdata(event.target.value)} /></td>
+            <td valign="top"><label>{descriptionReqdata}</label></td>
           </tr>
         </tbody>
       </table>

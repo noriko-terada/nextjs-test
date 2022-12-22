@@ -61,12 +61,12 @@ const handler = async (req:NextApiRequest, res:NextApiResponse) => {
 
     } else if (method === 'DELETE') {
       // BigQuery削除
-      const tmpUri:string = testutil.getParam(req, 'uri')
-      const uris:string[] = tmpUri.split(',')
+      const tmpKey:string = testutil.getParam(req, 'key')
+      const keys:string[] = tmpKey.split(',')
       const async:boolean = testutil.hasParam(req, '_async')
       const tablenamesStr:string = testutil.getParam(req, 'tablenames')
       const tablenames:any = testutil.getBqTablenames(tablenamesStr)
-      const result = await vtecxnext.deleteBQ(req, res, uris, async, tablenames)
+      const result = await vtecxnext.deleteBQ(req, res, keys, async, tablenames)
       const message = `delete bigquery. ${async ? '(async)' : ''} result=${result}`
       resJson = {feed : {'title' : message}}
       resStatus = async ? 202 : 200

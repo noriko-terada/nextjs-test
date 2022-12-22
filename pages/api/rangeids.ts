@@ -9,16 +9,16 @@ const handler = async (req:NextApiRequest, res:NextApiResponse) => {
     return
   }
   // キーを取得
-  const tmpUri = req.query['uri']
-  const uri:string = tmpUri ? String(tmpUri) : ''
+  const tmpKey = req.query['key']
+  const key:string = tmpKey ? String(tmpKey) : ''
   const tmpRange = req.query['range']
   const range:string = tmpRange ? String(tmpRange) : ''
-  console.log(`[rangeids] uri=${uri} range=${range}`)
+  console.log(`[rangeids] key=${key} range=${range}`)
   // エントリー取得
   let resStatus:number
   let resMessage:string
   try {
-    resMessage = await vtecxnext.rangeids(req, res, uri, range)
+    resMessage = await vtecxnext.rangeids(req, res, key, range)
     resStatus = 200
   } catch (error) {
     if (error instanceof VtecxNextError) {
