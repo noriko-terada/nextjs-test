@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import * as vtecxnext from 'utils/vtecxnext'
 import { VtecxNextError } from 'utils/vtecxnext'
+import * as testutil from 'utils/testutil'
 
 const handler = async (req:NextApiRequest, res:NextApiResponse) => {
   console.log(`[deleteentry] start. x-requested-with=${req.headers['x-requested-with']}`)
@@ -9,18 +10,16 @@ const handler = async (req:NextApiRequest, res:NextApiResponse) => {
     return
   }
   // キーを取得
-  const tmpKey = req.query['key']
-  const key = tmpKey ? String(tmpKey) : ''
-  const tmpRevision = req.query['r']
-  const revision = tmpRevision ? Number(tmpRevision) : undefined
-
-  console.log(`[deleteentry] key=${key} r=${revision}`)
+  const key = testutil.getParam(req, 'key')
+  const revision = testutil.getParamNumber(req, 'key')
+  const targetservice:string = testutil.getParam(req, 'targetservice')
+  console.log(`[deleteentry] key=${key} r=${revision} ${targetservice ? 'targetservice=' + targetservice : ''}`)
 
   // 削除
   let resStatus:number
   let resMessage:string
   try {
-    await vtecxnext.deleteEntry(req, res, key, revision)
+    await vtecxnext.deleteEntry(req, res, key, revision, targetservice)
     resStatus = 200
     resMessage = `entry deleted. ${key}`
   } catch (error) {

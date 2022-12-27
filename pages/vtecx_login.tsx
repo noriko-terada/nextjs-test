@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { getAuthToken } from 'vtecxauth'
+import { getAuthToken } from '@vtecx/vtecxauth'
 import Link from 'next/link'
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3"
 

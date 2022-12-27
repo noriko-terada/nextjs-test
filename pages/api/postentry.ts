@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import * as vtecxnext from 'utils/vtecxnext'
 import { VtecxNextError } from 'utils/vtecxnext'
+import * as testutil from 'utils/testutil'
 
 const handler = async (req:NextApiRequest, res:NextApiResponse) => {
   console.log(`[postentry] start. x-requested-with=${req.headers['x-requested-with']}`)
@@ -9,9 +10,9 @@ const handler = async (req:NextApiRequest, res:NextApiResponse) => {
     return
   }
   // 引数を取得
-  const tmpKey = req.query['key']
-  const key:string = tmpKey ? String(tmpKey) : ''
-  console.log(`[postentry] key=${key}`)
+  const key:string = testutil.getParam(req, 'key')
+  const targetservice:string = testutil.getParam(req, 'targetservice')
+  console.log(`[postentry] key=${key} ${targetservice ? 'targetservice=' + targetservice : ''}`)
 
   // 登録
   let resStatus:number
@@ -34,7 +35,7 @@ const handler = async (req:NextApiRequest, res:NextApiResponse) => {
   }
 
   try {
-    resJson = await vtecxnext.post(req, res, feed, key)
+    resJson = await vtecxnext.post(req, res, feed, key, targetservice)
     resStatus = 200
   } catch (error) {
     let resErrMsg:string

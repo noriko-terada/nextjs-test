@@ -51,7 +51,7 @@ const handler = async (req:NextApiRequest, res:NextApiResponse) => {
 
     } else if (method === 'POST') {
       // BigQuery登録
-      const async:boolean = testutil.hasParam(req, '_async')
+      const async:boolean = testutil.hasParam(req, 'async')
       const tablenamesStr:string = testutil.getParam(req, 'tablenames')
       const tablenames:any = testutil.getBqTablenames(tablenamesStr)
       const result = await vtecxnext.postBQ(req, res, testutil.getRequestJson(req), async, tablenames)

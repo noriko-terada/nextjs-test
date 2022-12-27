@@ -20,14 +20,15 @@ const handler = async (req:NextApiRequest, res:NextApiResponse) => {
       param = `${param}${param ? '&' : '?'}${tmpkey}=${req.query[tmpkey]}`
     }
   }
-  console.log(`[getfeed] key=${key} param=${param}`)
+  const targetservice:string = testutil.getParam(req, 'targetservice')
+  console.log(`[getfeed] key=${key} param=${param} ${targetservice ? 'targetservice=' + targetservice : ''}`)
 
   // フィード取得
   let resStatus:number
   let resJson:any
   try {
     const requesturi = `${key}${param}`
-    resJson = await vtecxnext.getFeed(req, res, requesturi)
+    resJson = await vtecxnext.getFeed(req, res, requesturi, targetservice)
     resStatus = resJson ? 200 : 204
   } catch (error) {
     let resErrMsg:string

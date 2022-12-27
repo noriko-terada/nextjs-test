@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { GetServerSideProps, GetServerSidePropsContext } from 'next'
 import * as vtecxnext from 'utils/vtecxnext'  // getServerSideProps で使用
-import { isPropertySignature } from 'typescript';
 
 function Header({title} : {title:string}) {
   return <h1>{title ? title : 'Default title'}</h1>;
@@ -14,6 +13,7 @@ const HomePage = (props:Props) => {
   const [result, setResult] = useState('');
   const [descriptionUrlparam, setDescriptionUrlparam] = useState('');
   const [descriptionReqdata, setDescriptionReqdata] = useState('');
+  const [targetservice, setTargetservice] = useState('');
 
   const options = [
     {
@@ -91,7 +91,7 @@ const HomePage = (props:Props) => {
     {
       label: 'delete folder',
       value: 'deletefolder',
-      labelUrlparam: 'key={親キー}[&_async]',
+      labelUrlparam: 'key={親キー}[&async]',
       labelReqdata: '',
     },
     {
@@ -229,7 +229,7 @@ const HomePage = (props:Props) => {
     {
       label: 'delete bigquery',
       value: 'bigquery_delete',
-      labelUrlparam: 'key={キー[,キー,...]}[&_async&tablenames={エンティティの第一階層名}:{テーブル名},...]',
+      labelUrlparam: 'key={キー[,キー,...]}[&async&tablenames={エンティティの第一階層名}:{テーブル名},...]',
       labelReqdata: '',
     },
     {
@@ -411,7 +411,7 @@ const HomePage = (props:Props) => {
       }
     }
   
-    const url = `api/${apiAction}?${urlparam ? urlparam + '&' : ''}${additionalParam ? additionalParam : ''}`
+    const url = `api/${apiAction}?${urlparam ? urlparam + '&' : ''}${additionalParam ? additionalParam : ''}${targetservice ? '&targetservice=' + targetservice : ''}`
     console.log(`[request] url=${url}`)
     const response = await fetch(url, requestInit)
     const status = response.status
@@ -546,6 +546,7 @@ const HomePage = (props:Props) => {
   const sizeText = 54
   const rowTextarea = 5
   const colsTextarea = 50
+  const sizeTargetservice = 20
   //console.log(`[HomePage] props.isLoggedin=${props.isLoggedin}`)
 
   // <select name="action" value={action} onChange={(e) => setAction(e.target.value)}>
@@ -561,6 +562,10 @@ const HomePage = (props:Props) => {
           <option key={option.value} value={option.value}>{option.label}</option>
         ))}
       </select>
+      <label>&nbsp;&nbsp;&nbsp;&nbsp;</label>
+      <label>連携サービス名: </label>
+      <input type="text" size={sizeTargetservice} id="targetservice" name="targetservice" value={targetservice} 
+                       onChange={(event) => setTargetservice(event.target.value)} />
       <br/>
       <table>
         <tbody>

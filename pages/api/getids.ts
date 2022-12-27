@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import * as vtecxnext from 'utils/vtecxnext'
 import { VtecxNextError } from 'utils/vtecxnext'
+import * as testutil from 'utils/testutil'
 
 const handler = async (req:NextApiRequest, res:NextApiResponse) => {
   console.log(`[getids] start. x-requested-with=${req.headers['x-requested-with']}`)
@@ -9,14 +10,15 @@ const handler = async (req:NextApiRequest, res:NextApiResponse) => {
     return
   }
   // キーを取得
-  const tmpKey = req.query['key']
-  const key:string = tmpKey ? String(tmpKey) : ''
-  console.log(`[getids] key=${key}`)
+  const key:string = testutil.getParam(req, 'key')
+  const targetservice:string = testutil.getParam(req, 'targetservice')
+  console.log(`[getids] key=${key} ${targetservice ? 'targetservice=' + targetservice : ''}`)
+
   // エントリー取得
   let resStatus:number
   let resMessage:string
   try {
-    resMessage = String(await vtecxnext.getids(req, res, key))
+    resMessage = String(await vtecxnext.getids(req, res, key, targetservice))
     resStatus = 200
   } catch (error) {
     if (error instanceof VtecxNextError) {

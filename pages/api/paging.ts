@@ -27,19 +27,20 @@ const handler = async (req:NextApiRequest, res:NextApiResponse) => {
     }
   }
   const requesturi = `${key}${param}`
+  const targetservice:string = testutil.getParam(req, 'targetservice')
+  console.log(`[paging] key=${key} param=${param} pagerange=${pagerange} num=${String(num)} ${targetservice ? 'targetservice=' + targetservice : ''}`)
 
-  console.log(`[paging] key=${key} pagerange=${pagerange} num=${String(num)}`)
   // ページング
   let resStatus:number = 200
   let resJson:any
   try {
     if (pagerange) {
       // ページネーション
-      resJson = await vtecxnext.pagination(req, res, requesturi, pagerange)
+      resJson = await vtecxnext.pagination(req, res, requesturi, pagerange, targetservice)
       resStatus = resJson ? 200 : 204
     } else if (num) {
       // ページ数取得
-      resJson = await vtecxnext.getPage(req, res, requesturi, testutil.toNumber(num))
+      resJson = await vtecxnext.getPage(req, res, requesturi, testutil.toNumber(num), targetservice)
       resStatus = resJson ? 200 : 204
     } else {
       console.log(`[paging] invalid type. key=${key}`)

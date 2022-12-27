@@ -10,16 +10,16 @@ const handler = async (req:NextApiRequest, res:NextApiResponse) => {
     return
   }
   // キーを取得
-  const tmpKey = req.query['key']
-  const key:string = tmpKey ? String(tmpKey) : ''
-  const async:boolean = testutil.hasParam(req, '_async')
-  console.log(`[deletefolder] key=${key} async=${async}`)
+  const key:string = testutil.getParam(req, 'key')
+  const async:boolean = testutil.hasParam(req, 'async')
+  const targetservice:string = testutil.getParam(req, 'targetservice')
+  console.log(`[deletefolder] key=${key} async=${async} ${targetservice ? 'targetservice=' + targetservice : ''}`)
 
   // 削除
   let resStatus:number
   let resMessage:string
   try {
-    await vtecxnext.deleteFolder(req, res, key, async)
+    await vtecxnext.deleteFolder(req, res, key, async, targetservice)
     resStatus = async ? 202 : 200
     resMessage = `folder deleted. ${async ? '(accepted)' : ''} ${key}`
   } catch (error) {

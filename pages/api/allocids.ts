@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import * as vtecxnext from 'utils/vtecxnext'
 import { VtecxNextError } from 'utils/vtecxnext'
+import * as testutil from 'utils/testutil'
 
 const handler = async (req:NextApiRequest, res:NextApiResponse) => {
   console.log(`[allocids] start. x-requested-with=${req.headers['x-requested-with']}`)
@@ -9,16 +10,18 @@ const handler = async (req:NextApiRequest, res:NextApiResponse) => {
     return
   }
   // キーを取得
-  const tmpKey = req.query['key']
-  const key:string = tmpKey ? String(tmpKey) : ''
+  const key:string = testutil.getParam(req, 'key')
   const tmpNum = req.query['num']
   const num:number = tmpNum ? Number(tmpNum) : 0
   console.log(`[allocids] key=${key} num=${num}`)
+  const targetservice:string = testutil.getParam(req, 'targetservice')
+  console.log(`[allocids] key=${key} num=${num} ${targetservice ? 'targetservice=' + targetservice : ''}`)
+
   // エントリー取得
   let resStatus:number
   let resMessage:string
   try {
-    resMessage = await vtecxnext.allocids(req, res, key, num)
+    resMessage = await vtecxnext.allocids(req, res, key, num, targetservice)
     resStatus = 200
   } catch (error) {
     if (error instanceof VtecxNextError) {

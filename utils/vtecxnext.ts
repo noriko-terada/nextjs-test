@@ -1,66 +1,12 @@
 import { IncomingMessage, ServerResponse } from 'http'
 var SqlString = require('sqlstring')
 
-// 型定義
-// 認証のため各関数にリクエスト(IncomingMessage)が必要。
-// セッション維持のため各関数にレスポンス(ServerResponse)が必要。
-type checkXRequestedWith = (req:IncomingMessage, res:ServerResponse) => boolean
-type sendMessage = (res:ServerResponse, statusCode:number, message:string) => boolean
-type login = (req:IncomingMessage, res:ServerResponse, wsse:string, reCaptchaToken?:string) => Promise<boolean>
-type logout = (req:IncomingMessage, res:ServerResponse) => Promise<boolean>
-type uid = (req:IncomingMessage, res:ServerResponse) => Promise<string>
-type whoami = (req:IncomingMessage, res:ServerResponse) => Promise<any>
-type isLoggedin = (req:IncomingMessage, res:ServerResponse) => Promise<boolean>
-type log = (req:IncomingMessage, res:ServerResponse, message: string, title?:string, subtitle?:string) => Promise<boolean>
-type getEntry = (req:IncomingMessage, res:ServerResponse, uri:string) => Promise<any>
-type getFeed = (req:IncomingMessage, res:ServerResponse, uri:string) => Promise<any>
-type count = (req:IncomingMessage, res:ServerResponse, uri:string) => Promise<number>
-type post = (req:IncomingMessage, res:ServerResponse, feed:any, uri?:string) => Promise<any>
-type put = (req:IncomingMessage, res:ServerResponse, feed:any) => Promise<any>
-type deleteEntry = (req:IncomingMessage, res:ServerResponse, uri:string, revision?:number) => Promise<boolean>
-type deleteFolder = (req:IncomingMessage, res:ServerResponse, uri:string) => Promise<boolean>
-type allocids = (req:IncomingMessage, res:ServerResponse, uri:string, num:number) => Promise<string>
-type addids = (req:IncomingMessage, res:ServerResponse, uri:string, num:number) => Promise<number>
-type getids = (req:IncomingMessage, res:ServerResponse, uri:string) => Promise<number>
-type setids = (req:IncomingMessage, res:ServerResponse, uri:string, num:number) => Promise<number>
-type rangeids = (req:IncomingMessage, res:ServerResponse, uri:string, range:string) => Promise<string>
-type getRangeids = (req:IncomingMessage, res:ServerResponse, uri:string) => Promise<string>
-type setSessionFeed = (req:IncomingMessage, res:ServerResponse, name:string, feed:any) => Promise<boolean>
-type setSessionEntry = (req:IncomingMessage, res:ServerResponse, name:string, entry:any) => Promise<boolean>
-type setSessionString = (req:IncomingMessage, res:ServerResponse, name:string, str:string) => Promise<boolean>
-type setSessionLong = (req:IncomingMessage, res:ServerResponse, name:string, num:number) => Promise<boolean>
-type incrementSession = (req:IncomingMessage, res:ServerResponse, name:string, num:number) => Promise<number>
-type deleteSessionFeed = (req:IncomingMessage, res:ServerResponse, name:string) => Promise<boolean>
-type deleteSessionEntry = (req:IncomingMessage, res:ServerResponse, name:string) => Promise<boolean>
-type deleteSessionString = (req:IncomingMessage, res:ServerResponse, name:string) => Promise<boolean>
-type deleteSessionLong = (req:IncomingMessage, res:ServerResponse, name:string) => Promise<boolean>
-type getSessionFeed = (req:IncomingMessage, res:ServerResponse, name:string) => Promise<any>
-type getSessionEntry = (req:IncomingMessage, res:ServerResponse, name:string) => Promise<any>
-type getSessionString = (req:IncomingMessage, res:ServerResponse, name:string) => Promise<string>
-type getSessionLong = (req:IncomingMessage, res:ServerResponse, name:string) => Promise<number>
-type pagination = (req:IncomingMessage, res:ServerResponse, uri:string, pagerange:string) => Promise<any>
-type getPage = (req:IncomingMessage, res:ServerResponse, uri:string, num:number) => Promise<any>
-type postBQ = (req:IncomingMessage, res:ServerResponse, feed:any, async?:boolean, tablenames?:any) => Promise<boolean>
-type deleteBQ = (req:IncomingMessage, res:ServerResponse, keys:string[], async?:boolean, tablenames?:any) => Promise<boolean>
-type getBQ = (req:IncomingMessage, res:ServerResponse, sql:string, parent?:string) => Promise<any>
-type getBQCsv = (req:IncomingMessage, res:ServerResponse, sql:string, values?:any[], filename?:string, parent?:string) => Promise<boolean>
-type toPdf = (req:IncomingMessage, res:ServerResponse, htmlTemplate:string, filename?:string) => Promise<boolean>
-type putSignature = (req:IncomingMessage, res:ServerResponse, uri:string, revision?:number) => Promise<any>
-type putSignatures = (req:IncomingMessage, res:ServerResponse, feed:any) => Promise<any>
-type deleteSignature = (req:IncomingMessage, res:ServerResponse, uri:string, revision?:number) => Promise<boolean>
-type checkSignature = (req:IncomingMessage, res:ServerResponse, uri:string) => Promise<boolean>
-type sendMail = (req:IncomingMessage, res:ServerResponse, entry:any, to:string[], cc?:string[], bcc?:string[], attachments?:string[]) => Promise<boolean>
-type pushNotification = (req:IncomingMessage, res:ServerResponse, message:string, to:string[], title?:string, subtitle?:string, imageUrl?:string, data?:any) => Promise<boolean>
-type setMessageQueueStatus = (req:IncomingMessage, res:ServerResponse, flag:boolean, channel:string) => Promise<boolean>
-type setMessageQueue = (req:IncomingMessage, res:ServerResponse, feed:any, channel:string) => Promise<boolean>
-type getMessageQueue = (req:IncomingMessage, res:ServerResponse, channel:string) => Promise<any>
-type joinGroup = (req:IncomingMessage, res:ServerResponse, group:string, selfid:string) => Promise<any>
-type leaveGroup = (req:IncomingMessage, res:ServerResponse, group:string) => Promise<boolean>
-
-// ----
-type requestVtecx = (method:string, url:string, req:IncomingMessage, body:any) => Promise<Response>
-type fetchVtecx = (method:string, url:string, headers:any, body:any) => Promise<Response>
-// ----
+/**
+ * Hello world.
+ */
+export const hello = ():void => {
+  console.log('Hello vtecxnext.')
+}
 
 /**
  * X-Requested-With header check.
@@ -69,7 +15,7 @@ type fetchVtecx = (method:string, url:string, headers:any, body:any) => Promise<
  * @param res response
  * @return false if no X-Requested-With header is specified
  */
- export const checkXRequestedWith = (req:IncomingMessage, res:ServerResponse) => {
+ export const checkXRequestedWith = (req:IncomingMessage, res:ServerResponse): boolean => {
   if (!req.headers['x-requested-with']) {
     res.writeHead(417)
     res.end()
@@ -85,7 +31,7 @@ type fetchVtecx = (method:string, url:string, headers:any, body:any) => Promise<
  * @param message message
  * @return true
  */
- export const sendMessage = (res:ServerResponse, statusCode:number, message:string) => {
+ export const sendMessage = (res:ServerResponse, statusCode:number, message:string): boolean => {
   const resJson = {'feed' : {'title' : message}}
   res.writeHead(statusCode)
   res.end(JSON.stringify(resJson))
@@ -102,7 +48,7 @@ type fetchVtecx = (method:string, url:string, headers:any, body:any) => Promise<
  * @param reCaptchaToken reCAPTCHA token
  * @return true if log in has been successful.
  */
- export const login = async (req:IncomingMessage, res:ServerResponse, wsse:string, reCaptchaToken?:string) => {
+ export const login = async (req:IncomingMessage, res:ServerResponse, wsse:string, reCaptchaToken?:string): Promise<boolean> => {
   //console.log('[vtecxnext login] start.')
   // 入力チェック
   checkNotNull(wsse, 'Authentication information')
@@ -134,7 +80,7 @@ type fetchVtecx = (method:string, url:string, headers:any, body:any) => Promise<
  * @param res response
  * @return true if log out has been successful.
  */
- export const logout = async (req:IncomingMessage, res:ServerResponse) => {
+ export const logout = async (req:IncomingMessage, res:ServerResponse): Promise<boolean> => {
   //console.log('[vtecxnext logout] start.')
   // vte.cxへリクエスト
   const method = 'GET'
@@ -158,7 +104,7 @@ type fetchVtecx = (method:string, url:string, headers:any, body:any) => Promise<
  * @param res response
  * @return uid
  */
- export const uid = async (req:IncomingMessage, res:ServerResponse) => {
+ export const uid = async (req:IncomingMessage, res:ServerResponse): Promise<string> => {
   //console.log('[vtecxnext uid] start.')
   // vte.cxへリクエスト
   const method = 'GET'
@@ -180,7 +126,7 @@ type fetchVtecx = (method:string, url:string, headers:any, body:any) => Promise<
  * @param res response (for authentication)
  * @return login user information
  */
- export const whoami = async (req:IncomingMessage, res:ServerResponse) => {
+ export const whoami = async (req:IncomingMessage, res:ServerResponse): Promise<any> => {
   //console.log('[vtecxnext whoami] start.')
   // vte.cxへリクエスト
   const method = 'GET'
@@ -201,7 +147,7 @@ type fetchVtecx = (method:string, url:string, headers:any, body:any) => Promise<
  * @param res response (for authentication)
  * @return true if logged in
  */
- export const isLoggedin = async (req:IncomingMessage, res:ServerResponse) => {
+ export const isLoggedin = async (req:IncomingMessage, res:ServerResponse): Promise<boolean> => {
   //console.log('[vtecxnext isLoggedin] start.')
   try {
     await uid(req, res)
@@ -220,7 +166,7 @@ type fetchVtecx = (method:string, url:string, headers:any, body:any) => Promise<
  * @param subtitle subtitle
  * @return true if successful
  */
-  export const log = async (req:IncomingMessage, res:ServerResponse, message:string, title?:string, subtitle?:string) => {
+  export const log = async (req:IncomingMessage, res:ServerResponse, message:string, title?:string, subtitle?:string): Promise<boolean> => {
   const logTitle = title ? title : 'JavaScript'
   const logSubtitle = subtitle ? subtitle : 'INFO'
   const feed = [{'title' : logTitle, 'subtitle' : logSubtitle, 'summary' : message}]
@@ -243,16 +189,17 @@ type fetchVtecx = (method:string, url:string, headers:any, body:any) => Promise<
  * @param req request (for authentication)
  * @param res response (for authentication)
  * @param uri key
+ * @param targetService target service name (for service linkage)
  * @return entry
  */
- export const getEntry = async (req:IncomingMessage, res:ServerResponse, uri:string) => {
+ export const getEntry = async (req:IncomingMessage, res:ServerResponse, uri:string, targetService?:string): Promise<any> => {
   //console.log('[vtecxnext getEntry] start.')
   // キー入力値チェック
   checkUri(uri)
   // vte.cxへリクエスト
   const method = 'GET'
   const url = `/p${uri}?e`
-  const response = await requestVtecx(method, url, req)
+  const response = await requestVtecx(method, url, req, null, targetService)
   //console.log(`[vtecxnext getEntry] response=${response}`)
   // vte.cxからのset-cookieを転記
   setCookie(response, res)
@@ -269,14 +216,14 @@ type fetchVtecx = (method:string, url:string, headers:any, body:any) => Promise<
  * @param uri key and conditions
  * @return feed (entry array)
  */
- export const getFeed = async (req:IncomingMessage, res:ServerResponse, uri:string) => {
+ export const getFeed = async (req:IncomingMessage, res:ServerResponse, uri:string, targetService?:string): Promise<any> => {
   //console.log('[vtecxnext getFeed] start.')
   // キー入力値チェック
   checkUri(uri)
   // vte.cxへリクエスト
   const method = 'GET'
   const url = `/p${uri}${uri.includes('?') ? '&' : '?'}f`
-  const response = await requestVtecx(method, url, req)
+  const response = await requestVtecx(method, url, req, null, targetService)
   //console.log(`[vtecxnext getFeed] response=${response}`)
   // vte.cxからのset-cookieを転記
   setCookie(response, res)
@@ -293,14 +240,14 @@ type fetchVtecx = (method:string, url:string, headers:any, body:any) => Promise<
  * @param uri key and conditions
  * @return count
  */
- export const count = async (req:IncomingMessage, res:ServerResponse, uri:string) => {
+ export const count = async (req:IncomingMessage, res:ServerResponse, uri:string, targetService?:string): Promise<number|null> => {
   //console.log('[vtecxnext count] start.')
   // キー入力値チェック
   checkUri(uri)
   // vte.cxへリクエスト
   const method = 'GET'
   const url = `/p${uri}${uri.includes('?') ? '&' : '?'}c`
-  const response = await requestVtecx(method, url, req)
+  const response = await requestVtecx(method, url, req, null, targetService)
   //console.log(`[vtecxnext count] response=${response}`)
   // vte.cxからのset-cookieを転記
   setCookie(response, res)
@@ -319,7 +266,7 @@ type fetchVtecx = (method:string, url:string, headers:any, body:any) => Promise<
  * @param uri parent key if not specified in entry
  * @return registed entries
  */
-export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, uri?:string) => {
+export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, uri?:string, targetService?:string): Promise<any> => {
   //console.log(`[vtecxnext post] start. feed=${feed}`)
   // 入力チェック
   checkNotNull(feed, 'Feed')
@@ -330,7 +277,7 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
   // vte.cxへリクエスト
   const method = 'POST'
   const url = `/p${uri ? uri : '/'}?e`
-  const response = await requestVtecx(method, url, req, JSON.stringify(feed))
+  const response = await requestVtecx(method, url, req, JSON.stringify(feed), targetService)
   //console.log(`[vtecxnext post] response. status=${response.status}`)
   // vte.cxからのset-cookieを転記
   setCookie(response, res)
@@ -349,7 +296,7 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
  * @param async Execute asynchronous if this param is true. Valid only if 'isbulk' is true.
  * @return updated entries
  */
- export const put = async (req:IncomingMessage, res:ServerResponse, feed:any, isbulk?:boolean, parallel?:boolean, async?:boolean) => {
+ export const put = async (req:IncomingMessage, res:ServerResponse, feed:any, isbulk?:boolean, parallel?:boolean, async?:boolean, targetService?:string): Promise<any> => {
   //console.log(`[vtecxnext put] start. feed=${feed}`)
   // 入力チェック
   checkNotNull(feed, 'Feed')
@@ -361,7 +308,7 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
   }
   const url = `/p/?e${additionalParam}`
   //console.log(`[vtecxnext put] url=${url}`)
-  const response = await requestVtecx(method, url, req, JSON.stringify(feed))
+  const response = await requestVtecx(method, url, req, JSON.stringify(feed), targetService)
   //console.log(`[vtecxnext put] response. status=${response.status}`)
   // vte.cxからのset-cookieを転記
   setCookie(response, res)
@@ -378,7 +325,7 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
  * @param revision number of revision
  * @return true if successful
  */
- export const deleteEntry = async (req:IncomingMessage, res:ServerResponse, uri:string, revision?:number) => {
+ export const deleteEntry = async (req:IncomingMessage, res:ServerResponse, uri:string, revision?:number, targetService?:string): Promise<boolean> => {
   //console.log(`[vtecxnext deleteEntry] start. uri=${uri} revision=${revision}`)
   // キー入力値チェック
   checkUri(uri)
@@ -386,7 +333,7 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
   const method = 'DELETE'
   const param = revision ? `&r=${revision}` : ''
   const url = `/p${uri}?e${param}`
-  const response = await requestVtecx(method, url, req)
+  const response = await requestVtecx(method, url, req, null, targetService)
   //console.log(`[vtecxnext deleteEntry] response. status=${response.status}`)
   // vte.cxからのset-cookieを転記
   setCookie(response, res)
@@ -403,14 +350,14 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
  * @param async execute async
  * @return true if successful
  */
- export const deleteFolder = async (req:IncomingMessage, res:ServerResponse, uri:string, async?:boolean) => {
+ export const deleteFolder = async (req:IncomingMessage, res:ServerResponse, uri:string, async?:boolean, targetService?:string): Promise<boolean> => {
   //console.log(`[vtecxnext deleteFolder] start. uri=${uri} async=${async}`)
   // キー入力値チェック
   checkUri(uri)
   // vte.cxへリクエスト
   const method = 'DELETE'
   const url = `/p${uri}?_rf${async ? '&_async' : ''}`
-  const response = await requestVtecx(method, url, req)
+  const response = await requestVtecx(method, url, req, null, targetService)
   //console.log(`[vtecxnext deleteFolder] response. status=${response.status}`)
   // vte.cxからのset-cookieを転記
   setCookie(response, res)
@@ -427,7 +374,7 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
  * @param num number to allocate
  * @return allocated numbers. comma separated if multiple.
  */
- export const allocids = async (req:IncomingMessage, res:ServerResponse, uri:string, num:number) => {
+ export const allocids = async (req:IncomingMessage, res:ServerResponse, uri:string, num:number, targetService?:string): Promise<string> => {
   //console.log('[vtecxnext allocids] start.')
   // キー入力値チェック
   checkUri(uri)
@@ -435,7 +382,7 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
   // vte.cxへリクエスト
   const method = 'GET'
   const url = `/p${uri}?_allocids=${num}`
-  const response = await requestVtecx(method, url, req)
+  const response = await requestVtecx(method, url, req, null, targetService)
   //console.log(`[vtecxnext allocids] response=${response}`)
   // vte.cxからのset-cookieを転記
   setCookie(response, res)
@@ -454,7 +401,7 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
  * @param num number to add
  * @return added number
  */
- export const addids = async (req:IncomingMessage, res:ServerResponse, uri:string, num:number) => {
+ export const addids = async (req:IncomingMessage, res:ServerResponse, uri:string, num:number, targetService?:string): Promise<number|null> => {
   //console.log('[vtecxnext addids] start.')
   // キー入力値チェック
   checkUri(uri)
@@ -462,7 +409,7 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
   // vte.cxへリクエスト
   const method = 'PUT'
   const url = `/p${uri}?_addids=${num}`
-  const response = await requestVtecx(method, url, req)
+  const response = await requestVtecx(method, url, req, null, targetService)
   //console.log(`[vtecxnext addids] response=${response}`)
   // vte.cxからのset-cookieを転記
   setCookie(response, res)
@@ -480,14 +427,14 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
  * @param uri key
  * @return added number
  */
- export const getids = async (req:IncomingMessage, res:ServerResponse, uri:string) => {
+ export const getids = async (req:IncomingMessage, res:ServerResponse, uri:string, targetService?:string): Promise<number|null> => {
   //console.log('[vtecxnext getids] start.')
   // キー入力値チェック
   checkUri(uri)
   // vte.cxへリクエスト
   const method = 'GET'
   const url = `/p${uri}?_getids`
-  const response = await requestVtecx(method, url, req)
+  const response = await requestVtecx(method, url, req, null, targetService)
   //console.log(`[vtecxnext getids] response=${response}`)
   // vte.cxからのset-cookieを転記
   setCookie(response, res)
@@ -506,7 +453,7 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
  * @param num number to set
  * @return set number
  */
- export const setids = async (req:IncomingMessage, res:ServerResponse, uri:string, num:number) => {
+ export const setids = async (req:IncomingMessage, res:ServerResponse, uri:string, num:number, targetService?:string): Promise<number|null> => {
   //console.log('[vtecxnext setids] start.')
   // キー入力値チェック
   checkUri(uri)
@@ -514,7 +461,7 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
   // vte.cxへリクエスト
   const method = 'PUT'
   const url = `/p${uri}?_setids=${num}`
-  const response = await requestVtecx(method, url, req)
+  const response = await requestVtecx(method, url, req, null, targetService)
   //console.log(`[vtecxnext setids] response=${response}`)
   // vte.cxからのset-cookieを転記
   setCookie(response, res)
@@ -533,7 +480,7 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
  * @param range addition range
  * @return addition range
  */
- export const rangeids = async (req:IncomingMessage, res:ServerResponse, uri:string, range:string) => {
+ export const rangeids = async (req:IncomingMessage, res:ServerResponse, uri:string, range:string): Promise<string> => {
   //console.log(`[vtecxnext rangeids] start. range=${range}`)
   // 入力値チェック
   checkUri(uri)
@@ -560,7 +507,7 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
  * @param uri key
  * @return addition range
  */
- export const getRangeids = async (req:IncomingMessage, res:ServerResponse, uri:string) => {
+ export const getRangeids = async (req:IncomingMessage, res:ServerResponse, uri:string): Promise<string> => {
   //console.log('[vtecxnext getrangeids] start.')
   // キー入力値チェック
   checkUri(uri)
@@ -586,7 +533,7 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
  * @param feed entries (JSON)
  * @return true if successful
  */
- export const setSessionFeed = async (req:IncomingMessage, res:ServerResponse, name:string, feed:any) => {
+ export const setSessionFeed = async (req:IncomingMessage, res:ServerResponse, name:string, feed:any): Promise<boolean> => {
   //console.log(`[vtecxnext setSessionFeed] start. name=${name} feed=${feed}`)
   // 入力チェック
   checkNotNull(name, 'Name')
@@ -611,7 +558,7 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
  * @param entry entry (JSON)
  * @return true if successful
  */
- export const setSessionEntry = async (req:IncomingMessage, res:ServerResponse, name:string, entry:any) => {
+ export const setSessionEntry = async (req:IncomingMessage, res:ServerResponse, name:string, entry:any): Promise<boolean> => {
   //console.log(`[vtecxnext setSessionEntry] start. name=${name} entry=${entry}`)
   // 入力チェック
   checkNotNull(name, 'Name')
@@ -637,7 +584,7 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
  * @param str string
  * @return true if successful
  */
- export const setSessionString = async (req:IncomingMessage, res:ServerResponse, name:string, str:string) => {
+ export const setSessionString = async (req:IncomingMessage, res:ServerResponse, name:string, str:string): Promise<boolean> => {
   //console.log(`[vtecxnext setSessionString] start. name=${name} str=${str}`)
   // 入力チェック
   checkNotNull(name, 'Name')
@@ -663,7 +610,7 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
  * @param num number
  * @return true if successful
  */
- export const setSessionLong = async (req:IncomingMessage, res:ServerResponse, name:string, num:number) => {
+ export const setSessionLong = async (req:IncomingMessage, res:ServerResponse, name:string, num:number): Promise<boolean> => {
   //console.log(`[vtecxnext setSessionLong] start. name=${name} num=${num}`)
   // 入力チェック
   checkNotNull(name, 'Name')
@@ -689,7 +636,7 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
  * @param num number to add
  * @return true if successful
  */
- export const incrementSession = async (req:IncomingMessage, res:ServerResponse, name:string, num:number) => {
+ export const incrementSession = async (req:IncomingMessage, res:ServerResponse, name:string, num:number): Promise<number|null> => {
   //console.log(`[vtecxnext incrementSession] start. name=${name} num=${num}`)
   // 入力チェック
   checkNotNull(name, 'Name')
@@ -715,7 +662,7 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
  * @param name name
  * @return true if successful
  */
- export const deleteSessionFeed = async (req:IncomingMessage, res:ServerResponse, name:string) => {
+ export const deleteSessionFeed = async (req:IncomingMessage, res:ServerResponse, name:string): Promise<boolean> => {
   //console.log(`[vtecxnext deleteSessionFeed] start. name=${name}`)
   // 入力チェック
   checkNotNull(name, 'Name')
@@ -738,7 +685,7 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
  * @param name name
  * @return true if successful
  */
- export const deleteSessionEntry = async (req:IncomingMessage, res:ServerResponse, name:string) => {
+ export const deleteSessionEntry = async (req:IncomingMessage, res:ServerResponse, name:string): Promise<boolean> => {
   //console.log(`[vtecxnext deleteSessionEntry] start. name=${name}`)
   // 入力チェック
   checkNotNull(name, 'Name')
@@ -761,7 +708,7 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
  * @param name name
  * @return true if successful
  */
- export const deleteSessionString = async (req:IncomingMessage, res:ServerResponse, name:string) => {
+ export const deleteSessionString = async (req:IncomingMessage, res:ServerResponse, name:string): Promise<boolean> => {
   //console.log(`[vtecxnext deleteSessionString] start. name=${name}`)
   // 入力チェック
   checkNotNull(name, 'Name')
@@ -784,7 +731,7 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
  * @param name name
  * @return true if successful
  */
- export const deleteSessionLong = async (req:IncomingMessage, res:ServerResponse, name:string) => {
+ export const deleteSessionLong = async (req:IncomingMessage, res:ServerResponse, name:string): Promise<boolean> => {
   //console.log(`[vtecxnext deleteSessionLong] start. name=${name}`)
   // 入力チェック
   checkNotNull(name, 'Name')
@@ -807,7 +754,7 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
  * @param name name
  * @return feed
  */
- export const getSessionFeed = async (req:IncomingMessage, res:ServerResponse, name:string) => {
+ export const getSessionFeed = async (req:IncomingMessage, res:ServerResponse, name:string): Promise<any> => {
   //console.log(`[vtecxnext getSessionFeed] start. name=${name}`)
   // 入力チェック
   checkNotNull(name, 'Name')
@@ -831,7 +778,7 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
  * @param name name
  * @return entry
  */
- export const getSessionEntry = async (req:IncomingMessage, res:ServerResponse, name:string) => {
+ export const getSessionEntry = async (req:IncomingMessage, res:ServerResponse, name:string): Promise<any> => {
   //console.log(`[vtecxnext getSessionEntry] start. name=${name}`)
   // 入力チェック
   checkNotNull(name, 'Name')
@@ -855,7 +802,7 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
  * @param name name
  * @return string
  */
- export const getSessionString = async (req:IncomingMessage, res:ServerResponse, name:string) => {
+ export const getSessionString = async (req:IncomingMessage, res:ServerResponse, name:string): Promise<string|null> => {
   //console.log(`[vtecxnext getSessionString] start. name=${name}`)
   // 入力チェック
   checkNotNull(name, 'Name')
@@ -884,7 +831,7 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
  * @param name name
  * @return number
  */
- export const getSessionLong = async (req:IncomingMessage, res:ServerResponse, name:string) => {
+ export const getSessionLong = async (req:IncomingMessage, res:ServerResponse, name:string): Promise<number|null> => {
   //console.log(`[vtecxnext getSessionLong] start. name=${name}`)
   // 入力チェック
   checkNotNull(name, 'Name')
@@ -914,14 +861,14 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
  * @param pagerange page range
  * @return feed Maximum number of pages in the specified page range, and total count.
  */
- export const pagination = async (req:IncomingMessage, res:ServerResponse, uri:string, pagerange:string) => {
+ export const pagination = async (req:IncomingMessage, res:ServerResponse, uri:string, pagerange:string, targetService?:string): Promise<any> => {
   //console.log('[vtecxnext pagination] start.')
   // キー入力値チェック
   checkUri(uri)
   // vte.cxへリクエスト
   const method = 'GET'
   const url = `/p${uri}${uri.includes('?') ? '&' : '?'}_pagination=${pagerange}`
-  const response = await requestVtecx(method, url, req)
+  const response = await requestVtecx(method, url, req, null, targetService)
   //console.log(`[vtecxnext pagination] response=${response}`)
   // vte.cxからのset-cookieを転記
   setCookie(response, res)
@@ -939,7 +886,7 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
  * @param num page number
  * @return feed Maximum number of pages in the specified page range, and total count.
  */
- export const getPage = async (req:IncomingMessage, res:ServerResponse, uri:string, num:number) => {
+ export const getPage = async (req:IncomingMessage, res:ServerResponse, uri:string, num:number, targetService?:string): Promise<any> => {
   //console.log('[vtecxnext getPage] start.')
   // 入力値チェック
   checkUri(uri)
@@ -947,7 +894,7 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
   // vte.cxへリクエスト
   const method = 'GET'
   const url = `/p${uri}${uri.includes('?') ? '&' : '?'}n=${num}`
-  const response = await requestVtecx(method, url, req)
+  const response = await requestVtecx(method, url, req, null, targetService)
   //console.log(`[vtecxnext getPage] response=${response}`)
   // vte.cxからのset-cookieを転記
   setCookie(response, res)
@@ -966,7 +913,7 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
  * @param tablenames key:entity's prop name, value:BigQuery table name
  * @return true if successful
  */
- export const postBQ = async (req:IncomingMessage, res:ServerResponse, feed:any, async?:boolean, tablenames?:any) => {
+ export const postBQ = async (req:IncomingMessage, res:ServerResponse, feed:any, async?:boolean, tablenames?:any): Promise<boolean> => {
   //console.log(`[vtecxnext postBQ] start. async=${async} feed=${feed}`)
   // 入力チェック
   checkNotNull(feed, 'Feed')
@@ -998,7 +945,7 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
  * @param tablenames key:entity's prop name, value:BigQuery table name
  * @return true if successful
  */
- export const deleteBQ = async (req:IncomingMessage, res:ServerResponse, keys:string[], async?:boolean, tablenames?:any) => {
+ export const deleteBQ = async (req:IncomingMessage, res:ServerResponse, keys:string[], async?:boolean, tablenames?:any): Promise<boolean> => {
   //console.log(`[vtecxnext deleteBQ] start. async=${async} keys=${keys}`)
   // 入力チェック
   checkNotNull(keys, 'Key')
@@ -1039,7 +986,7 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
  * @param parent parent name of result json
  * @return query results in JSON format
  */
- export const getBQ = async (req:IncomingMessage, res:ServerResponse, sql:string, values?:any[], parent?:string) => {
+ export const getBQ = async (req:IncomingMessage, res:ServerResponse, sql:string, values?:any[], parent?:string): Promise<any> => {
   //console.log(`[vtecxnext getBQ] start. sql=${sql} values=${values}`)
   // 入力チェック
   checkNotNull(sql, 'Query SQL')
@@ -1070,7 +1017,7 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
  * @param parent parent name of result json
  * @return true
  */
- export const getBQCsv = async (req:IncomingMessage, res:ServerResponse, sql:string, values?:any[], filename?:string, parent?:string) => {
+ export const getBQCsv = async (req:IncomingMessage, res:ServerResponse, sql:string, values?:any[], filename?:string, parent?:string): Promise<boolean> => {
   //console.log(`[vtecxnext getBQCsv] start. sql=${sql} values=${values}`)
   // 入力チェック
   checkNotNull(sql, 'Query SQL')
@@ -1103,7 +1050,7 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
  * @param filename PDF file name
  * @return true
  */
- export const toPdf = async (req:IncomingMessage, res:ServerResponse, htmlTemplate:string, filename?:string) => {
+ export const toPdf = async (req:IncomingMessage, res:ServerResponse, htmlTemplate:string, filename?:string): Promise<boolean> => {
   //console.log(`[vtecxnext toPdf] start. htmlTemplate=${htmlTemplate} filename=${filename}`)
   // 入力チェック
   checkNotNull(htmlTemplate, 'PDF template')
@@ -1134,7 +1081,7 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
  * @param revision revision
  * @return signed entry
  */
- export const putSignature = async (req:IncomingMessage, res:ServerResponse, uri:string, revision?:number) => {
+ export const putSignature = async (req:IncomingMessage, res:ServerResponse, uri:string, revision?:number): Promise<any> => {
   //console.log('[vtecxnext putSignature] start.')
   // キー入力値チェック
   checkUri(uri)
@@ -1158,7 +1105,7 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
  * @param feed entries
  * @return signed entries
  */
- export const putSignatures = async (req:IncomingMessage, res:ServerResponse, feed:any) => {
+ export const putSignatures = async (req:IncomingMessage, res:ServerResponse, feed:any): Promise<any> => {
   //console.log('[vtecxnext putSignatures] start.')
   // 入力チェック
   checkNotNull(feed, 'Feed')
@@ -1183,7 +1130,7 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
  * @param revision revision
  * @return true if successful
  */
- export const deleteSignature = async (req:IncomingMessage, res:ServerResponse, uri:string, revision?:number) => {
+ export const deleteSignature = async (req:IncomingMessage, res:ServerResponse, uri:string, revision?:number): Promise<boolean> => {
   //console.log('[vtecxnext deleteSignature] start.')
   // キー入力値チェック
   checkUri(uri)
@@ -1206,7 +1153,7 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
  * @param uri key
  * @return true if the signature is valid
  */
- export const checkSignature = async (req:IncomingMessage, res:ServerResponse, uri:string) => {
+ export const checkSignature = async (req:IncomingMessage, res:ServerResponse, uri:string): Promise<boolean> => {
   //console.log('[vtecxnext checkSignature] start.')
   // キー入力値チェック
   checkUri(uri)
@@ -1233,7 +1180,7 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
  * @param attachments keys of attachment files
  * @return true if successful
  */
- export const sendMail = async (req:IncomingMessage, res:ServerResponse, entry:any, to:string[], cc?:string[], bcc?:string[], attachments?:string[]) => {
+ export const sendMail = async (req:IncomingMessage, res:ServerResponse, entry:any, to:string[], cc?:string[], bcc?:string[], attachments?:string[]): Promise<boolean> => {
   //console.log(`[vtecxnext sendMail] start. to=${to}`)
   // 入力チェック
   checkNotNull(entry, 'Entry')
@@ -1289,7 +1236,7 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
  * @param data key value data (Expo)
  * @return true if successful
  */
- export const pushNotification = async (req:IncomingMessage, res:ServerResponse, message:string, to:string[], title?:string, subtitle?:string, imageUrl?:string, data?:any) => {
+ export const pushNotification = async (req:IncomingMessage, res:ServerResponse, message:string, to:string[], title?:string, subtitle?:string, imageUrl?:string, data?:any): Promise<boolean> => {
   //console.log(`[vtecxnext pushNotification] start. to=${to}`)
   // 入力チェック
   checkNotNull(message, 'Message')
@@ -1347,7 +1294,7 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
  * @param flag true if on, false if off
  * @param channel channel
  */
- export const setMessageQueueStatus = async (req:IncomingMessage, res:ServerResponse, flag:boolean, channel:string) => {
+ export const setMessageQueueStatus = async (req:IncomingMessage, res:ServerResponse, flag:boolean, channel:string): Promise<boolean> => {
   //console.log(`[vtecxnext setMessageQueueStatus] start. channel=${channel} flag=${flag}`)
   // キー入力値チェック
   checkUri(channel)
@@ -1371,7 +1318,7 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
  * @param channel channel
  * @return true if successful
  */
- export const setMessageQueue = async (req:IncomingMessage, res:ServerResponse, feed:any, channel:string) => {
+ export const setMessageQueue = async (req:IncomingMessage, res:ServerResponse, feed:any, channel:string): Promise<boolean> => {
   //console.log(`[vtecxnext setMessageQueue] start. channel=${channel} feed=${feed}`)
   // 入力チェック
   checkUri(channel)
@@ -1395,7 +1342,7 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
  * @param name name
  * @return feed
  */
- export const getMessageQueue = async (req:IncomingMessage, res:ServerResponse, channel:string) => {
+ export const getMessageQueue = async (req:IncomingMessage, res:ServerResponse, channel:string): Promise<any> => {
   //console.log(`[vtecxnext getMessageQueue] start. channel=${channel}`)
   // 入力チェック
   checkUri(channel)
@@ -1420,7 +1367,7 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
  * @param selfid hierarchical name under my group alias
  * @return feed
  */
- export const joinGroup = async (req:IncomingMessage, res:ServerResponse, group:string, selfid:string) => {
+ export const joinGroup = async (req:IncomingMessage, res:ServerResponse, group:string, selfid:string): Promise<any> => {
   //console.log(`[vtecxnext joinGroup] start. group=${group} selfid=${selfid}`)
   // 入力チェック
   checkUri(group)
@@ -1445,7 +1392,7 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
  * @param group group
  * @return feed
  */
- export const leaveGroup = async (req:IncomingMessage, res:ServerResponse, group:string) => {
+ export const leaveGroup = async (req:IncomingMessage, res:ServerResponse, group:string): Promise<boolean> => {
   //console.log(`[vtecxnext leaveGroup] start. group=${group}`)
   // 入力チェック
   checkUri(group)
@@ -1482,12 +1429,21 @@ export class VtecxNextError extends Error {
  * @param url サーブレットパス以降のURL
  * @param req リクエスト。認証情報設定に使用。
  * @param body リクエストデータ
+ * @param targetService 連携サービス名
  * @returns promise
  */
-const requestVtecx = async (method:string, url:string, req:IncomingMessage, body?:any) => {
+const requestVtecx = async (method:string, url:string, req:IncomingMessage, body?:any, targetService?:string): Promise<Response> => {
   // cookieの値をvte.cxへのリクエストヘッダに設定
   const cookie = req.headers['cookie']
-  const headers = {'Cookie' : cookie}
+  const headers:any = {'Cookie' : cookie}
+  if (targetService) {
+    const servicekey = process.env[`SERVICEKEY_${targetService}`]
+    console.log(`[requestVtecx] targetService=${targetService} servicekey=${servicekey}`)
+    if (servicekey) {
+      headers['X-SERVICELINKAGE'] = targetService
+      headers['X-SERVICEKEY'] = servicekey
+    }
+  }
   return fetchVtecx(method, url, headers, body)
 }
 
@@ -1499,7 +1455,7 @@ const requestVtecx = async (method:string, url:string, req:IncomingMessage, body
  * @param body リクエストデータ
  * @returns promise
  */
-const fetchVtecx = async (method:string, url:string, headers:any, body?:any) => {
+const fetchVtecx = async (method:string, url:string, headers:any, body?:any): Promise<Response> => {
   //console.log(`[vtecxnext fetchVtecx] url=${process.env.VTECX_URL}${url}`)
   headers['X-Requested-With'] = 'XMLHttpRequest'
   const apiKey = process.env.VTECX_APIKEY
@@ -1520,7 +1476,7 @@ const fetchVtecx = async (method:string, url:string, headers:any, body?:any) => 
  * @param response vte.cxからのレスポンス
  * @param res ブラウザへのレスポンス
  */
-const setCookie = (response:Response, res:ServerResponse) => {
+const setCookie = (response:Response, res:ServerResponse): void => {
   const setCookieVal = response.headers.get('set-cookie')
   if (setCookieVal === '' || setCookieVal) {
     res.setHeader('set-cookie', setCookieVal)
@@ -1533,7 +1489,7 @@ const setCookie = (response:Response, res:ServerResponse) => {
  * @param response vte.cxからのレスポンス
  * @param res ブラウザへのレスポンス
  */
-const setResponseHeaders = (response:Response, res:ServerResponse) => {
+const setResponseHeaders = (response:Response, res:ServerResponse): void => {
   const it = response.headers.entries()
   let header:IteratorResult<[string, string], any> = it.next()
   while (header && !header.done) {
@@ -1553,7 +1509,7 @@ const setResponseHeaders = (response:Response, res:ServerResponse) => {
  * @param response Response
  * @returns 戻り値はなし。エラーの場合VtecxNextErrorをスロー。
  */
-const checkVtecxResponse = async (response:Response) => {
+const checkVtecxResponse = async (response:Response): Promise<void> => {
   if (response.status < 400) {
     return
   } else {
@@ -1575,7 +1531,7 @@ const checkVtecxResponse = async (response:Response) => {
  * @param name 項目名。エラーの場合メッセージに使用。
  * @returns 戻り値はなし。エラーの場合VtecxNextErrorをスロー。
  */
-const checkNotNull = (val:any, name?:string) => {
+const checkNotNull = (val:any, name?:string): void => {
   if (!val) {
     throw new VtecxNextError(400, `${name ? name : 'Key'} is required.`)
   }
@@ -1589,7 +1545,7 @@ const checkNotNull = (val:any, name?:string) => {
  * @param name 項目名。エラーの場合メッセージに使用。
  * @returns 戻り値はなし。エラーの場合VtecxNextErrorをスロー。
  */
- const checkUri = (str:string, name?:string) => {
+ const checkUri = (str:string, name?:string): void => {
   checkNotNull(str, name)
   if (!str.startsWith('/')) {
     throw new VtecxNextError(400, `${name ? name : 'Key'} must start with a slash.`)
@@ -1601,7 +1557,7 @@ const checkNotNull = (val:any, name?:string) => {
  * @param response レスポンス
  * @returns JSON
  */
-const getJson = async (response:Response) => {
+const getJson = async (response:Response): Promise<any> => {
   // ステータスが204の場合nullを返す。
   if (response.status === 204) {
     return null
@@ -1622,7 +1578,7 @@ const getJson = async (response:Response) => {
  * @param tablenames テーブル名(キー:entry第一階層名、値:テーブル名)
  * @returns BigQuery登録・削除時のテーブル名指定文字列 ({スキーマ第一階層名}:{テーブル名}, ...)
  */
-const editBqTableNames = (tablenames:any) => {
+const editBqTableNames = (tablenames:any): any => {
   //console.log(`[editBqTableNames] tablenames = ${tablenames}`)
   if (!tablenames) {
     return null
@@ -1644,7 +1600,7 @@ const editBqTableNames = (tablenames:any) => {
  * @param parent 戻り値JSONの親項目(任意)か、CSVのヘッダ(任意)
  * @returns BigQuery検索の引数
  */
-const editGetBqArgument = (sql:string, values?:any[], parent?:string) => {
+const editGetBqArgument = (sql:string, values?:any[], parent?:string): any => {
   // SQLに引数を代入（SQLインジェクション対応）
   const editSql = values ? formatSql(sql, values) : sql
   //console.log(`[vtecxnext editGetBqArgument] sql=${editSql}`)
@@ -1662,7 +1618,7 @@ const editGetBqArgument = (sql:string, values?:any[], parent?:string) => {
  * @param values 置き換え対象値
  * @returns 値が代入されたSQL
  */
-const formatSql = (sql:string, values:any[]) => {
+const formatSql = (sql:string, values:any[]): string => {
   if (!values) {
     return sql
   }
@@ -1675,7 +1631,7 @@ const formatSql = (sql:string, values:any[]) => {
  * @param hrefs hrefに指定する値のリスト
  * @returns link
  */
-const getLinks = (rel:string, hrefs:string[]) => {
+const getLinks = (rel:string, hrefs:string[]): any => {
   if (!rel || !hrefs) {
     return undefined
   }
@@ -1688,4 +1644,12 @@ const getLinks = (rel:string, hrefs:string[]) => {
   }
   //console.log(`[vtecxnext getLinks] links=${JSON.stringify(links)}`)
   return links
+}
+
+const getServiceKey = (targetService:string) => {
+  if (!targetService) {
+    return null
+  }
+  // 環境変数
+
 }

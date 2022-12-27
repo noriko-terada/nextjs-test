@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import * as vtecxnext from 'utils/vtecxnext'
 import { VtecxNextError } from 'utils/vtecxnext'
+import * as testutil from 'utils/testutil'
 
 const handler = async (req:NextApiRequest, res:NextApiResponse) => {
     console.log(`[getcount] start. x-requested-with=${req.headers['x-requested-with']}`)
@@ -18,15 +19,15 @@ const handler = async (req:NextApiRequest, res:NextApiResponse) => {
       param = `${param}${param ? '&' : '?'}${tmpkey}=${req.query[tmpkey]}`
     }
   }
-  console.log(`[getcount] key=${key}`)
-  console.log(`[getcount] param=${param}`)
+  const targetservice:string = testutil.getParam(req, 'targetservice')
+  console.log(`[getcount] key=${key} param=${param} ${targetservice ? 'targetservice=' + targetservice : ''}`)
 
   // 件数取得
   let resStatus:number
   let resMessage:string
   try {
     const requesturi = `${key}${param}`
-    resMessage = String(await vtecxnext.count(req, res, requesturi))
+    resMessage = String(await vtecxnext.count(req, res, requesturi, targetservice))
     resStatus = 200
   } catch (error) {
     if (error instanceof VtecxNextError) {

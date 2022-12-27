@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import * as vtecxnext from 'utils/vtecxnext'
 import { VtecxNextError } from 'utils/vtecxnext'
+import * as testutil from 'utils/testutil'
 
 const handler = async (req:NextApiRequest, res:NextApiResponse) => {
   console.log(`[putentry] start. x-requested-with=${req.headers['x-requested-with']}`)
@@ -31,17 +32,15 @@ const handler = async (req:NextApiRequest, res:NextApiResponse) => {
 
   try {
     const isbulkStr = req.query['isbulk']
-    //const isbulk = isbulkStr ? 'true' === isbulkStr ? true : false : undefined
     const isbulk = isbulkStr != undefined ? true : false
     const parallelStr = req.query['parallel']
-    //const parallel = parallelStr ? 'true' === parallelStr ? true : false : undefined
     const parallel = parallelStr != undefined ? true : false
     const asyncStr = req.query['async']
-    //const async = asyncStr ? 'true' === asyncStr ? true : false : undefined
     const async = asyncStr != undefined ? true : false
-    console.log(`[putentry] isbulk=${isbulk} parallel=${parallel} async=${async}`)
-
-    resJson = await vtecxnext.put(req, res, feed, isbulk, parallel, async)
+    const targetservice:string = testutil.getParam(req, 'targetservice')
+    console.log(`[putentry] isbulk=${isbulk} parallel=${parallel} async=${async} ${targetservice ? 'targetservice=' + targetservice : ''}`)
+  
+    resJson = await vtecxnext.put(req, res, feed, isbulk, parallel, async, targetservice)
     resStatus = 200
   } catch (error) {
     let resErrMsg:string
