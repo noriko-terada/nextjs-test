@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import * as vtecxnext from 'utils/vtecxnext'
 import { VtecxNextError } from 'utils/vtecxnext'
+import * as testutil from 'utils/testutil'
 
 /**
  * ログイン処理.
@@ -15,7 +16,7 @@ const handler = async (req:NextApiRequest, res:NextApiResponse) => {
   }
   // リクエストヘッダからWSSEを取得
   const wsse = String(req.headers['x-wsse'])
-  const reCaptchaToken = String(req.query['g-recaptcha-token'])
+  const reCaptchaToken = testutil.getParam(req, 'g-recaptcha-token')
   const param = reCaptchaToken ? `&g-recaptcha-token=${reCaptchaToken}` : ''
   console.log(`[login] x-wsse=${wsse}`)
   if (wsse == null) {

@@ -30,6 +30,10 @@ const handler = async (req:NextApiRequest, res:NextApiResponse) => {
       const result = await vtecxnext.leaveGroup(req, res, group)
       const message = `left the group. ${group}`
       resJson = {feed : {'title' : message}}
+
+    } else if (method === 'GET') {
+      // グループメンバーエントリーとして存在するが、自身の署名をしていないエントリーを取得.
+      resJson = await vtecxnext.noGroupMember(req, res, group)
     }
 
   } catch (error) {

@@ -2,19 +2,13 @@ import { NextApiRequest, NextApiResponse } from 'next'
 import * as vtecxnext from 'utils/vtecxnext'
 import { VtecxNextError } from 'utils/vtecxnext'
 
-type getRequestJson = (req:NextApiRequest) => any
-type getParam = (req:NextApiRequest, name:string) => string
-type toString = (tmpVal:any) => string
-type getParamNumber = (req:NextApiRequest, name:string) => number
-type toNumber = (tmpVal:any) => number
-
 /**
  * リクエストデータを取得.
  * エラー発生時、ステータス400のApiRouteTestErrorをスローする。
  * @param req リクエスト
  * @return JSON
  */
- export const getRequestJson = (req:NextApiRequest) => {
+ export const getRequestJson = (req:NextApiRequest): any => {
   let json
   try {
     json = req.body ? JSON.parse(req.body) : null
@@ -37,7 +31,7 @@ type toNumber = (tmpVal:any) => number
  * @param name パラメータ名
  * @return パラメータ値
  */
- export const getParam = (req:NextApiRequest, name:string) => {
+ export const getParam = (req:NextApiRequest, name:string): string => {
   const tmpVal = req.query[name]
   return toString(tmpVal)
 }
@@ -48,7 +42,7 @@ type toNumber = (tmpVal:any) => number
  * @param name パラメータ名
  * @return パラメータ値
  */
- export const hasParam = (req:NextApiRequest, name:string) => {
+ export const hasParam = (req:NextApiRequest, name:string): boolean => {
   const tmpVal = req.query[name]
   console.log(`[hasParam] ${name}=${tmpVal}`)
   return tmpVal == undefined ? false : true
@@ -59,7 +53,7 @@ type toNumber = (tmpVal:any) => number
  * @param tmpVal 値
  * @return stringの値
  */
- export const toString = (tmpVal:any) => {
+ export const toString = (tmpVal:any): string => {
   return tmpVal ? String(tmpVal) : ''
 }
 
@@ -69,7 +63,7 @@ type toNumber = (tmpVal:any) => number
  * @param name パラメータ名
  * @return パラメータ値
  */
- export const getParamNumber = (req:NextApiRequest, name:string) => {
+ export const getParamNumber = (req:NextApiRequest, name:string): number|undefined => {
   const tmpVal = req.query[name]
   if (!tmpVal) {
     return undefined
@@ -83,7 +77,7 @@ type toNumber = (tmpVal:any) => number
  * @param name パラメータ名
  * @return パラメータ値
  */
- export const getParamNumberRequired = (req:NextApiRequest, name:string) => {
+ export const getParamNumberRequired = (req:NextApiRequest, name:string): number => {
   const tmpVal = req.query[name]
   return toNumber(tmpVal)
 }
@@ -93,7 +87,7 @@ type toNumber = (tmpVal:any) => number
  * @param tmpVal 値
  * @return numberの値
  */
- export const toNumber = (tmpVal:any) => {
+ export const toNumber = (tmpVal:any): number => {
   let errMsg = `Not numeric. ${tmpVal}`
   if (tmpVal) {
     try {
@@ -112,7 +106,7 @@ type toNumber = (tmpVal:any) => number
  * @param tmpVal 値
  * @return booleanの値
  */
- export const toBoolean = (tmpVal:string) => {
+ export const toBoolean = (tmpVal:string): boolean => {
   let errMsg = `Not boolean. ${tmpVal}`
   if (tmpVal) {
     try {
@@ -131,7 +125,7 @@ type toNumber = (tmpVal:any) => number
  * @param tablenamesStr 値
  * @return テーブル名リスト
  */
- export const getBqTablenames = (tablenamesStr:string) => {
+ export const getBqTablenames = (tablenamesStr:string): any => {
   if (!tablenamesStr) {
     return null
   }

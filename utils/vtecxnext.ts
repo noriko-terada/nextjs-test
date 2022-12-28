@@ -4,7 +4,7 @@ var SqlString = require('sqlstring')
 /**
  * Hello world.
  */
-export const hello = ():void => {
+export const hello = (): void => {
   console.log('Hello vtecxnext.')
 }
 
@@ -74,6 +74,37 @@ export const hello = ():void => {
 }
 
 /**
+ * login with RXID.
+ * If the login is successful, sets the authentication information in a cookie.
+ * @param req request
+ * @param res response
+ * @param rxid RXID
+ * @return true if log in has been successful.
+ */
+export const loginWithRxid = async (req:IncomingMessage, res:ServerResponse, rxid:string): Promise<boolean> => {
+  //console.log('[vtecxnext loginWithRxid] start.')
+  // 入力チェック
+  checkNotNull(rxid, 'Authentication information')
+  // ログイン
+  // reCAPTCHA tokenは任意
+  const method = 'GET'
+  const url = `/d/?_login&_RXID=${rxid}`
+  const response = await requestVtecx(method, url, req)
+  const feed = await response.json()
+  // vte.cxからのset-cookieを転記
+  setCookie(response, res)
+  // レスポンスのエラーチェック
+  let isLoggedin
+  if (response.status < 400) {
+    isLoggedin = true
+  } else {
+    isLoggedin = false
+  }
+  //console.log(`[vtecxnext loginWithRxid] end. status=${response.status} message=${feed.title}`)
+  return isLoggedin
+}
+
+/**
  * logout.
  * If the logout is successful, delete the authentication information in a cookie.
  * @param req request
@@ -99,6 +130,24 @@ export const hello = ():void => {
 }
 
 /**
+ * get current datetime
+ * @return current datetime
+ */
+export const now = async (): Promise<string> => {
+  //console.log('[vtecxnext now] start.')
+  // vte.cxへリクエスト
+  const method = 'GET'
+  const url = '/d/?_now'
+  const response = await requestVtecx(method, url)
+  //console.log(`[vtecxnext now] response=${response}`)
+  // レスポンスのエラーチェック
+  await checkVtecxResponse(response)
+  // 戻り値
+  const data = await getJson(response)
+  return data.feed.title
+}
+
+/**
  * get login uid
  * @param req request
  * @param res response
@@ -111,6 +160,28 @@ export const hello = ():void => {
   const url = '/d/?_uid'
   const response = await requestVtecx(method, url, req)
   //console.log(`[vtecxnext uid] response=${response}`)
+  // vte.cxからのset-cookieを転記
+  setCookie(response, res)
+  // レスポンスのエラーチェック
+  await checkVtecxResponse(response)
+  // 戻り値
+  const data = await getJson(response)
+  return data.feed.title
+}
+
+/**
+ * get login account
+ * @param req request
+ * @param res response
+ * @return account
+ */
+ export const account = async (req:IncomingMessage, res:ServerResponse): Promise<string> => {
+  //console.log('[vtecxnext account] start.')
+  // vte.cxへリクエスト
+  const method = 'GET'
+  const url = '/d/?_account'
+  const response = await requestVtecx(method, url, req)
+  //console.log(`[vtecxnext account] response=${response}`)
   // vte.cxからのset-cookieを転記
   setCookie(response, res)
   // レスポンスのエラーチェック
@@ -155,6 +226,50 @@ export const hello = ():void => {
   } catch (error) {
     return false
   }
+}
+
+/**
+ * get login service
+ * @param req request
+ * @param res response
+ * @return service
+ */
+ export const service = async (req:IncomingMessage, res:ServerResponse): Promise<string> => {
+  //console.log('[vtecxnext service] start.')
+  // vte.cxへリクエスト
+  const method = 'GET'
+  const url = '/d/?_service'
+  const response = await requestVtecx(method, url, req)
+  //console.log(`[vtecxnext service] response=${response}`)
+  // vte.cxからのset-cookieを転記
+  setCookie(response, res)
+  // レスポンスのエラーチェック
+  await checkVtecxResponse(response)
+  // 戻り値
+  const data = await getJson(response)
+  return data.feed.title
+}
+
+/**
+ * get RXID
+ * @param req request
+ * @param res response
+ * @return RXID
+ */
+ export const rxid = async (req:IncomingMessage, res:ServerResponse): Promise<string> => {
+  //console.log('[vtecxnext service] start.')
+  // vte.cxへリクエスト
+  const method = 'GET'
+  const url = '/d/?_getrxid'
+  const response = await requestVtecx(method, url, req)
+  //console.log(`[vtecxnext uid] response=${response}`)
+  // vte.cxからのset-cookieを転記
+  setCookie(response, res)
+  // レスポンスのエラーチェック
+  await checkVtecxResponse(response)
+  // 戻り値
+  const data = await getJson(response)
+  return data.feed.title
 }
 
 /**
@@ -1409,6 +1524,153 @@ export const post = async (req:IncomingMessage, res:ServerResponse, feed:any, ur
   return true
 }
 
+/**
+ * Get entries that have entries in a group, but are not in the group.
+ * (for entries with no signature or with an incorrect signature, if the user group requires a signature)
+ * @param req request (for authentication)
+ * @param res response (for authentication)
+ * @param uri group key
+ * @return feed (entry array)
+ */
+export const noGroupMember = async (req:IncomingMessage, res:ServerResponse, uri:string): Promise<any> => {
+  //console.log('[vtecxnext noGroupMember] start.')
+  // キー入力値チェック
+  checkUri(uri)
+  // vte.cxへリクエスト
+  const method = 'GET'
+  const url = `/d${uri}?_no_group_member`
+  const response = await requestVtecx(method, url, req)
+  //console.log(`[vtecxnext noGroupMember] response=${response}`)
+  // vte.cxからのset-cookieを転記
+  setCookie(response, res)
+  // レスポンスのエラーチェック
+  await checkVtecxResponse(response)
+  // 戻り値
+  return await getJson(response)
+}
+
+/**
+ * add user
+ * @param req request (for authentication)
+ * @param res response (for authentication)
+ * @param feed entry (JSON)
+ * @param reCaptchaToken reCAPTCHA token
+ * @return message feed
+ */
+export const adduser = async (req:IncomingMessage, res:ServerResponse, feed:any, reCaptchaToken:string): Promise<any> => {
+  //console.log(`[vtecxnext adduser] start. feed=${feed}`)
+  // 入力チェック
+  checkNotNull(feed, 'Feed')
+  // vte.cxへリクエスト
+  const method = 'POST'
+  const param = reCaptchaToken ? `&g-recaptcha-token=${reCaptchaToken}` : ''
+  const url = `/d/?_adduser${param}`
+  const response = await requestVtecx(method, url, req, JSON.stringify(feed))
+  //console.log(`[vtecxnext adduser] response. status=${response.status}`)
+  // vte.cxからのset-cookieを転記
+  setCookie(response, res)
+  // レスポンスのエラーチェック
+  await checkVtecxResponse(response)
+  return await getJson(response)
+}
+
+/**
+ * add user by user admin
+ * @param req request (for authentication)
+ * @param res response (for authentication)
+ * @param feed entries (JSON)
+ * @param reCaptchaToken reCAPTCHA token
+ * @return message feed
+ */
+export const adduserByAdmin = async (req:IncomingMessage, res:ServerResponse, feed:any): Promise<any> => {
+  //console.log(`[vtecxnext adduserByAdmin] start. feed=${feed}`)
+  // 入力チェック
+  checkNotNull(feed, 'Feed')
+  // vte.cxへリクエスト
+  const method = 'POST'
+  const url = `/d/?_adduserByAdmin`
+  const response = await requestVtecx(method, url, req, JSON.stringify(feed))
+  //console.log(`[vtecxnext adduserByAdmin] response. status=${response.status}`)
+  // vte.cxからのset-cookieを転記
+  setCookie(response, res)
+  // レスポンスのエラーチェック
+  await checkVtecxResponse(response)
+  return await getJson(response)
+}
+
+/**
+ * Send email for password reset
+ * @param req request (for authentication)
+ * @param res response (for authentication)
+ * @param feed entry (JSON)
+ * @param reCaptchaToken reCAPTCHA token
+ * @return message feed
+ */
+export const passreset = async (req:IncomingMessage, res:ServerResponse, feed:any, reCaptchaToken?:string): Promise<any> => {
+  //console.log(`[vtecxnext passreset] start. feed=${feed}`)
+  // 入力チェック
+  checkNotNull(feed, 'Feed')
+  // vte.cxへリクエスト
+  const method = 'POST'
+  const param = reCaptchaToken ? `&g-recaptcha-token=${reCaptchaToken}` : ''
+  const url = `/d/?_passreset${param}`
+  const response = await requestVtecx(method, url, req, JSON.stringify(feed))
+  //console.log(`[vtecxnext passreset] response. status=${response.status}`)
+  // vte.cxからのset-cookieを転記
+  setCookie(response, res)
+  // レスポンスのエラーチェック
+  await checkVtecxResponse(response)
+  return await getJson(response)
+}
+
+/**
+ * change password
+ * @param req request (for authentication)
+ * @param res response (for authentication)
+ * @param feed entry (JSON)
+ * @return message feed
+ */
+export const changepass = async (req:IncomingMessage, res:ServerResponse, feed:any): Promise<any> => {
+  //console.log(`[vtecxnext changepass] start. feed=${feed}`)
+  // 入力チェック
+  checkNotNull(feed, 'Feed')
+  // vte.cxへリクエスト
+  const method = 'PUT'
+  const url = `/d/?_changephash`
+  const response = await requestVtecx(method, url, req, JSON.stringify(feed))
+  //console.log(`[vtecxnext changepass] response. status=${response.status}`)
+  // vte.cxからのset-cookieを転記
+  setCookie(response, res)
+  // レスポンスのエラーチェック
+  await checkVtecxResponse(response)
+  return await getJson(response)
+}
+
+/**
+ * change password by user admin
+ * @param req request (for authentication)
+ * @param res response (for authentication)
+ * @param feed entry (JSON)
+ * @return message feed
+ */
+export const changepassByAdmin = async (req:IncomingMessage, res:ServerResponse, feed:any): Promise<any> => {
+  //console.log(`[vtecxnext changepassByAdmin] start. feed=${feed}`)
+  // 入力チェック
+  checkNotNull(feed, 'Feed')
+  // vte.cxへリクエスト
+  const method = 'PUT'
+  const url = `/d/?_changephashByAdmin`
+  const response = await requestVtecx(method, url, req, JSON.stringify(feed))
+  //console.log(`[vtecxnext changepassByAdmin] response. status=${response.status}`)
+  // vte.cxからのset-cookieを転記
+  setCookie(response, res)
+  // レスポンスのエラーチェック
+  await checkVtecxResponse(response)
+  return await getJson(response)
+}
+
+
+
 //---------------------------------------------
 /**
  * Error returned from vte.cx
@@ -1432,13 +1694,14 @@ export class VtecxNextError extends Error {
  * @param targetService 連携サービス名
  * @returns promise
  */
-const requestVtecx = async (method:string, url:string, req:IncomingMessage, body?:any, targetService?:string): Promise<Response> => {
+const requestVtecx = async (method:string, url:string, req?:IncomingMessage, body?:any, targetService?:string): Promise<Response> => {
   // cookieの値をvte.cxへのリクエストヘッダに設定
-  const cookie = req.headers['cookie']
-  const headers:any = {'Cookie' : cookie}
+  const cookie = req ? req.headers['cookie'] : undefined
+  const headers:any = cookie ? {'Cookie' : cookie} : {}
   if (targetService) {
+    // サービス連携の場合
     const servicekey = process.env[`SERVICEKEY_${targetService}`]
-    console.log(`[requestVtecx] targetService=${targetService} servicekey=${servicekey}`)
+    //console.log(`[requestVtecx] targetService=${targetService} servicekey=${servicekey}`)
     if (servicekey) {
       headers['X-SERVICELINKAGE'] = targetService
       headers['X-SERVICEKEY'] = servicekey
@@ -1644,12 +1907,4 @@ const getLinks = (rel:string, hrefs:string[]): any => {
   }
   //console.log(`[vtecxnext getLinks] links=${JSON.stringify(links)}`)
   return links
-}
-
-const getServiceKey = (targetService:string) => {
-  if (!targetService) {
-    return null
-  }
-  // 環境変数
-
 }

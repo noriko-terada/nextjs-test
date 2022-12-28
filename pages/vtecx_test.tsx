@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { GetServerSideProps, GetServerSidePropsContext } from 'next'
 import * as vtecxnext from 'utils/vtecxnext'  // getServerSideProps で使用
+import * as browserutil from 'utils/browserutil'
 
 function Header({title} : {title:string}) {
   return <h1>{title ? title : 'Default title'}</h1>;
@@ -43,6 +44,30 @@ const HomePage = (props:Props) => {
     {
       label: 'is logged in',
       value: 'isloggedin',
+      labelUrlparam: '',
+      labelReqdata: '',
+    },
+    {
+      label: 'account (/d)',
+      value: 'info_account',
+      labelUrlparam: '',
+      labelReqdata: '',
+    },
+    {
+      label: 'rxid (/d)',
+      value: 'info_rxid',
+      labelUrlparam: '',
+      labelReqdata: '',
+    },
+    {
+      label: 'service (/d)',
+      value: 'info_service',
+      labelUrlparam: '',
+      labelReqdata: '',
+    },
+    {
+      label: 'now (/d)',
+      value: 'info_now',
       labelUrlparam: '',
       labelReqdata: '',
     },
@@ -369,6 +394,12 @@ const HomePage = (props:Props) => {
       labelReqdata: '',
     },
     {
+      label: 'no group member',
+      value: 'group_get',
+      labelUrlparam: 'group={グループのエイリアス(/_user/{UID}/group)}',
+      labelReqdata: '',
+    },
+    {
       label: 'send message',
       value: 'sendmessage',
       labelUrlparam: 'status={ステータス}&message={メッセージ}',
@@ -401,7 +432,8 @@ const HomePage = (props:Props) => {
    * @param additionalParam 追加パラメータ
    * @returns レスポンスJSON
    */
-  const request = async (method:string, apiAction:string, body?:any, additionalParam?:string) => {
+  /*
+  const request = async (method:string, apiAction:string, body?:any, additionalParam?:string): Promise<any> => {
     console.log(`[request] start. apiAction=${apiAction} method=${method}`)
     const requestInit:RequestInit = {
       body: body,
@@ -431,6 +463,7 @@ const HomePage = (props:Props) => {
     console.log(data)
     return data
   }
+  */
    
   const doRequest = async () => {
     setResult('')
@@ -517,10 +550,18 @@ const HomePage = (props:Props) => {
     } else if (action.startsWith('group_')) {
       method = action.substring(6)
       apiAction = 'group'
+    } else if (action.startsWith('info_')) {
+      method = 'GET'
+      apiAction = 'info'
+      additionalParam = `type=${action.substring(5)}`
     }
 
     if (method != null && apiAction != null) {
-      const data = await request(method, apiAction, body, additionalParam)
+      additionalParam = `${additionalParam ? additionalParam : ''}${targetservice ? (additionalParam ? '&' : '') + 'targetservice=' + targetservice : ''}`
+      //console.log(`[request] edit additionalParam = ${additionalParam}`)
+      const tmpUrlparam = `${urlparam ? urlparam : ''}${additionalParam ? (urlparam ? '&' : '') + additionalParam : ''}`
+      //console.log(`[request] edit tmpUrlparam = ${tmpUrlparam}`)
+      const data = await browserutil.requestApi(method, apiAction, tmpUrlparam, body)
       if (isJson || 'feed' in data) {
         const feedStr = JSON.stringify(data)
         console.log(`[doRequest] data=${feedStr}`)
@@ -608,7 +649,7 @@ export const getServerSideProps:GetServerSideProps = async (context:GetServerSid
   const props: Props = {
     isLoggedin: String(isLoggedin)
   }
-  console.log(`[getServerSideProps] props.isLoggedin=${props.isLoggedin}`)
+  console.log(`[vtecx_test getServerSideProps] props.isLoggedin=${props.isLoggedin}`)
 
   return {
     props: props,
