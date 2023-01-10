@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { GetServerSideProps, GetServerSidePropsContext } from 'next'
 import { getHashpass } from '@vtecx/vtecxauth'
-import * as vtecxnext from 'utils/vtecxnext'  // getServerSideProps で使用
+import * as vtecxnext from '@vtecx/vtecxnext'  // getServerSideProps で使用
 import Link from 'next/link'
 import * as browserutil from 'utils/browserutil'
 

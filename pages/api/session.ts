@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next'
-import * as vtecxnext from 'utils/vtecxnext'
-import { VtecxNextError } from 'utils/vtecxnext'
+import * as vtecxnext from '@vtecx/vtecxnext'
+import { VtecxNextError } from '@vtecx/vtecxnext'
 import * as testutil from 'utils/testutil'
 import { ApiRouteTestError } from 'utils/testutil'
 

@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next'
-import * as vtecxnext from 'utils/vtecxnext'
-import { VtecxNextError } from 'utils/vtecxnext'
+import * as vtecxnext from '@vtecx/vtecxnext'
+import { VtecxNextError } from '@vtecx/vtecxnext'
 
 const handler = async (req:NextApiRequest, res:NextApiResponse) => {
   console.log(`[getrangeids] start. x-requested-with=${req.headers['x-requested-with']}`)

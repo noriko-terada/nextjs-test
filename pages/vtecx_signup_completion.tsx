@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { GetServerSideProps, GetServerSidePropsContext } from 'next'
-import * as vtecxnext from 'utils/vtecxnext'  // getServerSideProps で使用
+import * as vtecxnext from '@vtecx/vtecxnext'  // getServerSideProps で使用
 import Link from 'next/link'
 
 function Header({title} : {title:string}) {

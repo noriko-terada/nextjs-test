@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { GetServerSideProps, GetServerSidePropsContext } from 'next'
-import * as vtecxnext from 'utils/vtecxnext'  // getServerSideProps で使用
+import * as vtecxnext from '@vtecx/vtecxnext'  // getServerSideProps で使用
 import * as browserutil from 'utils/browserutil'
 
 function Header({title} : {title:string}) {
@@ -24,19 +24,19 @@ const HomePage = (props:Props) => {
       labelReqdata: '',
     },
     {
-      label: 'uid (/d)',
+      label: 'uid',
       value: 'uid',
       labelUrlparam: '',
       labelReqdata: '',
     },
     {
-      label: 'uid2 (run twice) (/d)',
+      label: 'uid2 (run twice)',
       value: 'uid2',
       labelUrlparam: '',
       labelReqdata: '',
     },
     {
-      label: 'whoami (/d)',
+      label: 'whoami',
       value: 'whoami',
       labelUrlparam: '',
       labelReqdata: '',
@@ -48,25 +48,25 @@ const HomePage = (props:Props) => {
       labelReqdata: '',
     },
     {
-      label: 'account (/d)',
+      label: 'account',
       value: 'info_account',
       labelUrlparam: '',
       labelReqdata: '',
     },
     {
-      label: 'rxid (/d)',
+      label: 'rxid',
       value: 'info_rxid',
       labelUrlparam: '',
       labelReqdata: '',
     },
     {
-      label: 'service (/d)',
+      label: 'service',
       value: 'info_service',
       labelUrlparam: '',
       labelReqdata: '',
     },
     {
-      label: 'now (/d)',
+      label: 'now',
       value: 'info_now',
       labelUrlparam: '',
       labelReqdata: '',
@@ -406,7 +406,7 @@ const HomePage = (props:Props) => {
       labelReqdata: '',
     },
     {
-      label: 'logout (/d)',
+      label: 'logout',
       value: 'logout',
       labelUrlparam: '',
       labelReqdata: '',
@@ -588,13 +588,10 @@ const HomePage = (props:Props) => {
   const rowTextarea = 5
   const colsTextarea = 50
   const sizeTargetservice = 20
-  //console.log(`[HomePage] props.isLoggedin=${props.isLoggedin}`)
-
-  // <select name="action" value={action} onChange={(e) => setAction(e.target.value)}>
 
   return (
     <div>
-      <Header title="vte.cx 汎用APIテスト" />
+      <Header title="vtecxnext テスト" />
       <label>【getServerSideProps】 is logged in: {props.isLoggedin}</label>
       <br/>
       <br/>
