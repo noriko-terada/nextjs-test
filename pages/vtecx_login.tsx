@@ -82,7 +82,10 @@ function Header({title} : {title:string}) {
       <p>{result}</p>
       <Link href="/vtecx_test">汎用APIテスト</Link>
       <br/>
+      <br/>
       <Link href="/vtecx_signup">新規ユーザ登録</Link>
+      <br/>
+      <Link href="/vtecx_passreset">パスワードを忘れた方はこちら</Link>
     </div>
   );
 }
