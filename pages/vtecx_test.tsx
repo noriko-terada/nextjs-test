@@ -30,12 +30,6 @@ const HomePage = (props:Props) => {
       labelReqdata: '',
     },
     {
-      label: 'uid2 (run twice)',
-      value: 'uid2',
-      labelUrlparam: '',
-      labelReqdata: '',
-    },
-    {
       label: 'whoami',
       value: 'whoami',
       labelUrlparam: '',
