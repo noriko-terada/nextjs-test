@@ -97,4 +97,3 @@ function Header({title} : {title:string}) {
 }
 
 export default HomePage
-
