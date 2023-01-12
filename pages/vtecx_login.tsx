@@ -80,7 +80,7 @@ function Header({title} : {title:string}) {
       </table>
       <button onClick={handleClick}>login</button>
       <p>{result}</p>
-      <Link href="/vtecx_test">汎用APIテスト</Link>
+      <Link href="/vtecx_test">vtecxnext テスト</Link>
       <br/>
       <br/>
       <Link href="/vtecx_signup">新規ユーザ登録</Link>

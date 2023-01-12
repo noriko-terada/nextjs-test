@@ -24,13 +24,19 @@ const HomePage = (props:Props) => {
       labelReqdata: '',
     },
     {
-      label: 'uid',
+      label: 'uid (/d)',
       value: 'uid',
       labelUrlparam: '',
       labelReqdata: '',
     },
     {
-      label: 'whoami',
+      label: 'uid2 (run twice) (/d)',
+      value: 'uid2',
+      labelUrlparam: '',
+      labelReqdata: '',
+    },
+    {
+      label: 'whoami (/d)',
       value: 'whoami',
       labelUrlparam: '',
       labelReqdata: '',
@@ -42,25 +48,25 @@ const HomePage = (props:Props) => {
       labelReqdata: '',
     },
     {
-      label: 'account',
+      label: 'account (/d)',
       value: 'info_account',
       labelUrlparam: '',
       labelReqdata: '',
     },
     {
-      label: 'rxid',
+      label: 'rxid (/d)',
       value: 'info_rxid',
       labelUrlparam: '',
       labelReqdata: '',
     },
     {
-      label: 'service',
+      label: 'service (/d)',
       value: 'info_service',
       labelUrlparam: '',
       labelReqdata: '',
     },
     {
-      label: 'now',
+      label: 'now (/d)',
       value: 'info_now',
       labelUrlparam: '',
       labelReqdata: '',
@@ -282,8 +288,7 @@ const HomePage = (props:Props) => {
       label: 'put signatures',
       value: 'signature_put_2',
       labelUrlparam: '',
-      labelReqdata: `「feed」
-      [
+      labelReqdata: `[
         {
           "link" : [
             {"___rel": "self", "___href" : 「署名対象キー」}
@@ -307,8 +312,7 @@ const HomePage = (props:Props) => {
       label: 'send mail',
       value: 'sendmail',
       labelUrlparam: 'to={to指定メールアドレス,...}[&cc={cc指定メールアドレス,...}&bcc={bcc指定メールアドレス,...}&attachments={添付ファイルのキー,...}]',
-      labelReqdata: `「entry」
-      {
+      labelReqdata: `{
         "title" : 「メールのタイトル」,
         "summary" : 「テキストメッセージ」,
         "content" : {
@@ -321,8 +325,7 @@ const HomePage = (props:Props) => {
       label: 'push notification',
       value: 'pushnotification',
       labelUrlparam: 'to={Push通知送信先(グループ、UID、アカウントのいずれか),...}[&imageUrl={通知イメージURL(FCM用)}]',
-      labelReqdata: `「entry」
-      {
+      labelReqdata: `{
         "title" : 「Push通知タイトル(任意)」,
         "subtitle" : 「Push通知サブタイトル(任意)」,
         "content" : {
@@ -347,7 +350,7 @@ const HomePage = (props:Props) => {
       label: 'send message queue',
       value: 'messagequeue_post',
       labelUrlparam: 'channel={チャネル}',
-      labelReqdata: `「feed」
+      labelReqdata: `
       [
         {
           "link" : [
@@ -400,7 +403,166 @@ const HomePage = (props:Props) => {
       labelReqdata: '',
     },
     {
-      label: 'logout',
+      label: 'adduser by admin',
+      value: 'user_post_adduserbyadmin',
+      labelUrlparam: '',
+      labelReqdata: `
+      [
+        {
+          "contributor": [
+              {
+                  "uri": "urn:vte.cx:auth:{メールアドレス},{パスワード}",
+                  "name": "{ニックネーム}"
+              }
+          ],
+          "title": "メールのタイトル(任意)",
+          "summary": "テキストメール本文(任意)",
+          "content": {
+              "______text": "HTMLメール本文(任意)"
+          }
+        },
+        ...
+      ]
+      `,
+    },
+    {
+      label: 'changepass by admin',
+      value: 'user_put_changepassbyadmin',
+      labelUrlparam: '',
+      labelReqdata: `
+      [
+        {
+          "contributor": [
+            {
+              "uri": "urn:vte.cx:auth:,{パスワード}"
+            }
+          ],
+          "link": [
+            {
+              "___href": "/_user/{UID}/auth",
+              "___rel": "self"
+            }
+          ]
+        }
+      ]
+      `,
+    },
+    {
+      label: 'change account',
+      value: 'user_put_changeaccount',
+      labelUrlparam: '',
+      labelReqdata: `
+      [
+        {
+            "contributor": [
+                {
+                    "uri": "urn:vte.cx:auth:{メールアドレス}"
+                }
+            ],
+            "title": "メールのタイトル(任意)",
+            "summary": "テキストメール本文(任意)",
+            "content": {
+                "______text": "HTMLメール本文(任意)"
+            }
+        }
+      ]
+      `,
+    },
+    {
+      label: 'change account verify',
+      value: 'user_put_changeaccount_verify',
+      labelUrlparam: 'verify={認証コード}',
+      labelReqdata: '',
+    },
+    {
+      label: 'userstatus',
+      value: 'user_get_userstatus',
+      labelUrlparam: '[account={アカウント}]',
+      labelReqdata: '',
+    },
+    {
+      label: 'revoke user',
+      value: 'user_put_revokeuser',
+      labelUrlparam: 'account={アカウント}',
+      labelReqdata: '',
+    },
+    {
+      label: 'revoke users',
+      value: 'user_put_revokeusers',
+      labelUrlparam: '',
+      labelReqdata: `(アカウント・UIDいずれかを指定) 
+      [
+        {
+          "link": [
+            {
+              "___href": "/_user/{UID}",
+              "___rel": "self"
+            }
+          ],
+          "title": "{アカウント}"
+        },
+        ...
+      ]
+      `,
+    },
+    {
+      label: 'activate user',
+      value: 'user_put_activateuser',
+      labelUrlparam: 'account={アカウント}',
+      labelReqdata: '',
+    },
+    {
+      label: 'activate users',
+      value: 'user_put_activateusers',
+      labelUrlparam: '',
+      labelReqdata: `(アカウント・UIDいずれかを指定) 
+      [
+        {
+          "link": [
+            {
+              "___href": "/_user/{UID}",
+              "___rel": "self"
+            }
+          ],
+          "title": "{アカウント}"
+        },
+        ...
+      ]
+      `,
+    },
+    {
+      label: 'cancel user',
+      value: 'user_delete_canceluser',
+      labelUrlparam: '',
+      labelReqdata: '',
+    },
+    {
+      label: 'delete user',
+      value: 'user_delete_deleteuser',
+      labelUrlparam: 'account={アカウント}',
+      labelReqdata: '',
+    },
+    {
+      label: 'delete users',
+      value: 'user_put_deleteusers',
+      labelUrlparam: '',
+      labelReqdata: `(アカウント・UIDいずれかを指定) 
+      [
+        {
+          "link": [
+            {
+              "___href": "/_user/{UID}",
+              "___rel": "self"
+            }
+          ],
+          "title": "{アカウント}"
+        },
+        ...
+      ]
+      `,
+    },
+    {
+      label: 'logout (/d)',
       value: 'logout',
       labelUrlparam: '',
       labelReqdata: '',
@@ -417,47 +579,6 @@ const HomePage = (props:Props) => {
       }
     }
   }
-
-  /**
-   * 戻り値がJSONのリクエスト
-   * @param method メソッド
-   * @param apiAction サーバサイドJS名
-   * @param body リクエストデータ
-   * @param additionalParam 追加パラメータ
-   * @returns レスポンスJSON
-   */
-  /*
-  const request = async (method:string, apiAction:string, body?:any, additionalParam?:string): Promise<any> => {
-    console.log(`[request] start. apiAction=${apiAction} method=${method}`)
-    const requestInit:RequestInit = {
-      body: body,
-      method: method,
-      headers: {
-        'X-Requested-With': 'XMLHttpRequest'
-      }
-    }
-  
-    const url = `api/${apiAction}?${urlparam ? urlparam + '&' : ''}${additionalParam ? additionalParam : ''}${targetservice ? '&targetservice=' + targetservice : ''}`
-    console.log(`[request] url=${url}`)
-    const response = await fetch(url, requestInit)
-    const status = response.status
-    console.log(`[request] response. status=${status}`)
-    let data
-    if (status === 204) {
-      data = null
-    } else {
-      const contentType = response.headers.get('content-type')
-      console.log(`[request] content-type=${contentType}`)
-      if (!contentType || contentType.startsWith('application/json')) {
-        data = await response.json()
-      } else {
-        data = await response.blob()
-      }
-    }
-    console.log(data)
-    return data
-  }
-  */
    
   const doRequest = async () => {
     setResult('')
@@ -548,6 +669,19 @@ const HomePage = (props:Props) => {
       method = 'GET'
       apiAction = 'info'
       additionalParam = `type=${action.substring(5)}`
+    } else if (action.startsWith('user_')) {
+      const tmpAction = action.substring(5)
+      console.log(`[request] 'user_' + '${tmpAction}'`)
+      const idx = tmpAction.indexOf('_')
+      method = tmpAction.substring(0, idx)
+      additionalParam = `type=${tmpAction.substring(idx + 1)}`
+      console.log(`[request] method=${method} additionalParam=${additionalParam}`)
+      if (method) {
+        apiAction = 'user'
+        if (method === 'post' || method === 'put') {
+          body = reqdata
+        }
+      }
     }
 
     if (method != null && apiAction != null) {
